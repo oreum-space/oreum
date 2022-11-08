@@ -1,0 +1,7 @@
+:root {
+  --app-header-height: 48px;
+  --app-scrollbar-width: 12px;
+  --app-footer-min-height: 64px;
+  --vh: var(--jsvh, 1vh);
+  --fvh: calc(var(--vh) * 100);
+}

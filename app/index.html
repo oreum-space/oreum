@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <!-- Settings -->
+    <meta charset="UTF-8">
+    <link id="favicon" rel="icon" type="image/svg+xml" href="/favicons/faviconLoading.svg">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#FF0000">
+    <title>Oreum Space</title>
+    <!-- Styles -->
+    <style id="pre-style"> html { background: #EEE } @media (prefers-color-scheme: dark) { html { background: #111 } } </style>
+    <link
+      rel="stylesheet"
+      href="./src/style/index.scss"
+      onload="document.head.removeChild(document.getElementById('pre-style')); this.attributes.onload = null"
+    >
+    <!-- Scripts -->
+    <script type="module" src="./src/main.ts"></script>
+  </head>
+  <body></body>
+</html>

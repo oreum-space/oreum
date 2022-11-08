@@ -1,0 +1,23 @@
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path
+    d="M0.5 3.5L0.5 0.500001L8 0.5C12.1422 0.5 15.5 3.85786 15.5 8C15.5 12.1422 12.1422 15.5 8 15.5C3.85786 15.5 0.500001 12.1422 0.500001 8L0.500001 5.5H3.5V8C3.5 10.4852 5.51471 12.5 8 12.5C10.4852 12.5 12.5 10.4852 12.5 8C12.5 5.51471 10.4852 3.5 8 3.5H0.5Z"
+    stroke="white"
+  />
+  <path
+    d="M2 6V8C2 11.3137 4.68629 14 8 14C11.3137 14 14 11.3137 14 8C14 4.68629 11.3137 2 8 2H1"
+    stroke="white"
+    stroke-width="3"
+    stroke-dasharray="37.3"
+    stroke-dashoffset="0"
+  >
+    <animate
+      fill="freeze"
+      attributeName="stroke-dashoffset"
+      values="37.3;0;-37.3"
+      dur="1.2s"
+      calcMode="spline"
+      keySplines="0.4 0 0.2 1; 0.4 0 0.2 1"
+      repeatCount="indefinite"
+    />
+  </path>
+</svg>

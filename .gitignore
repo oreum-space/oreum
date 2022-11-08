@@ -1,0 +1,7 @@
+/.idea/
+/.cert/
+/node_modules/
+/server-dist/
+/app-dist/
+
+yarn.lock

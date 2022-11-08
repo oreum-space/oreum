@@ -1,0 +1,4 @@
+@import "./theme/dark.css" (prefers-color-scheme: dark);
+@import "./theme/light.css" (prefers-color-scheme: light);
+@import "app";
+@import "ui";

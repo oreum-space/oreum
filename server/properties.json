@@ -1,0 +1,9 @@
+{
+  "http": {
+    "port": 443,
+    "secure": {
+      "key": "./.cert/key.pem",
+      "cert": "./.cert/cert.pem"
+    }
+  }
+}
