@@ -1,5 +1,7 @@
 :root {
-  --app-header-height: 48px;
+  --app-default-max-width: 1392px;
+  --app-default-max-width-half: calc(var(--app-default-max-width) / 2);
+  --app-header-height: 56px;
   --app-scrollbar-width: 12px;
   --app-footer-min-height: 64px;
   --vh: var(--jsvh, 1vh);

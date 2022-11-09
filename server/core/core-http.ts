@@ -56,9 +56,17 @@ export default class CoreHttp {
     })
   }
 
+  public static handlerSorter ({ priority: a }: CoreHttpHandler, { priority: b }: CoreHttpHandler) {
+    return a === b ? 0 : (a > b ? -1 : 1)
+  }
+
   public listen () {
-    this.handlers.sort(({ priority: a }, { priority: b }) => a === b ? 0 : (a > b ? -1 : 1))
-    console.table(this.handlers)
+    this.handlers.sort(CoreHttp.handlerSorter)
+    for (const handler of this.handlers) {
+      if (handler instanceof CoreHttpRouter) {
+        handler.sort()
+      }
+    }
     this.server.listen(this.port)
   }
 
@@ -73,4 +81,12 @@ export default class CoreHttp {
   public get (path: string | RegExp, handler: CoreHttpFunction, options?: CoreHttpHandlerOptions) {
     this.handlers.push(new CoreHttpHandler('GET', path, handler, options))
   }
+
+  public use (router: CoreHttpRouter) {
+    this.handlers.push(router)
+  }
+
+  // TODO: post
+  // TODO: patch
+  // TODO: delete
 }

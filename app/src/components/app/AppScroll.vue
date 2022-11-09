@@ -1,11 +1,14 @@
 <template>
-  <div
-    ref="scrollbar"
-    role="scrollbar"
-    class="app-scrollbar"
-    :style="style"
-    @pointerdown="pointerdown"
-  />
+  <transition name="fade">
+    <div
+      v-show="style.thumbHeight <= 0.93"
+      ref="scrollbar"
+      role="scrollbar"
+      class="app-scrollbar"
+      :style="style"
+      @pointerdown="pointerdown"
+    />
+  </transition>
 </template>
 
 <script
@@ -85,7 +88,7 @@ let scrollTopDown = 0
 
 function pointermove (event: PointerEvent): void {
   const scrollBound = html.scrollHeight - window.innerHeight
-  const percent = scrollBound / (window.innerHeight - 64 -
+  const percent = scrollBound / (window.innerHeight - 56 -
     parseFloat(window.getComputedStyle(scrollbar.value!, ':after').height))
   html.scrollTop = Math.max(Math.min(scrollTopDown - (down - event.y) * percent, scrollBound), 0)
 }
@@ -170,7 +173,7 @@ function pointerup (event: PointerEvent): void {
 
 @media (max-width: 768px) or (hover: none) {
   .app-scrollbar {
-    display: none;
+    display: none !important;
   }
 }
 </style>

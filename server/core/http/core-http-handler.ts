@@ -11,28 +11,31 @@ export type CoreHttpHandlerOptions = {
 }
 
 export default class CoreHttpHandler {
-  private readonly path: string | RegExp
-  private readonly handler: CoreHttpFunction
   private readonly method: string
+  protected readonly path: string | RegExp
+  protected readonly pathSlices: Array<string>
+  protected readonly handler: CoreHttpFunction
 
   // Options
   private disabled: boolean
   public readonly priority: number
 
-  constructor (method: string, path: string | RegExp, handler: CoreHttpFunction, option?: CoreHttpHandlerOptions) {
-    this.disabled = !!option?.disabled
-    this.priority = option?.priority ?? 0
+  constructor (method: string, path: string | RegExp, handler: CoreHttpFunction, options?: CoreHttpHandlerOptions) {
+    this.disabled = !!options?.disabled
+    this.priority = options?.priority ?? 0
     this.method = method
     this.handler = handler
     this.path = path
+    this.pathSlices = path instanceof RegExp ? [] : path.split('/').filter(_ => !!_)
   }
 
   public handle (request: CoreHttpRequest) {
     if (
-      (this.path instanceof RegExp ? request.path.match(request.path) : this.path === request.path) &&
-        request.method === this.method
+      (this.path instanceof RegExp) ? this.path.test(request.path) :
+      (this.path.includes(':') ? request.match(this.pathSlices) : request.path === this.path) &&
+      request.method === this.method
     ) {
-      return this.handler(request)
+      return this.handler.call(this, request)
     }
   }
 }

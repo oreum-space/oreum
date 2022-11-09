@@ -73,26 +73,28 @@ class CoreHttpRequestCachedFile {
 export default class CoreHttpRequest {
   readonly stream: ServerHttp2Stream
   readonly headers: IncomingHttpHeaders
-  public readonly path: string
   private readonly outgoingHeader: OutgoingHttpHeaders
   public readonly method: string
+  public readonly path: string
+  private readonly pathSlices: Array<string>
+  private currentPathSlices: Array<string>
 
   constructor (stream: ServerHttp2Stream, headers: IncomingHttpHeaders) {
     this.stream = stream
     this.headers = headers
     this.path = headers[':path'] || '/'
+    this.pathSlices = this.path.split('/').filter(_ => !!_)
     const methodFromHeader = headers[http2.constants.HTTP2_HEADER_METHOD]
     this.method = typeof methodFromHeader === 'string' ? methodFromHeader : 'GET'
-    this.outgoingHeader = {
-      [http2.constants.HTTP2_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN]: '*'
-    }
+    this.outgoingHeader = { [http2.constants.HTTP2_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN]: '*' }
+    this.currentPathSlices = []
   }
 
-  setOutgoingHeader (key: string, value: string | string[] | number) {
+  public setOutgoingHeader (key: string, value: string | string[] | number) {
     this.outgoingHeader[key] = value
   }
 
-  respond (headers?: OutgoingHttpHeaders, options?: ServerStreamResponseOptions): CoreHttpRequest {
+  public respond (headers?: OutgoingHttpHeaders, options?: ServerStreamResponseOptions): CoreHttpRequest {
     this.stream.respond({
       ...this.outgoingHeader,
       ...headers
@@ -100,21 +102,24 @@ export default class CoreHttpRequest {
     return this
   }
 
-  end (cb?: () => void): this
-  end (chunk: any, cb?: () => void): this
-  end (chunk: any, encoding?: BufferEncoding, cb?: () => void): this
-  end (a?: any, b?: any, c?: any): CoreHttpRequest {
+  public end (cb?: () => void): this
+  public end (chunk: any, cb?: () => void): this
+  public end (chunk: any, encoding?: BufferEncoding, cb?: () => void): this
+  public end (a?: any, b?: any, c?: any): CoreHttpRequest {
     this.stream.end(a, b, c)
     return this
   }
 
-  data (headers?: OutgoingHttpHeaders, options?: ServerStreamResponseOptions, data?: unknown): CoreHttpRequest {
+  public data (headers?: OutgoingHttpHeaders, options?: ServerStreamResponseOptions, data?: unknown): CoreHttpRequest {
     this.respond(headers, options)
     this.stream.end(data)
     return this
   }
 
   private _file (path: string, options?: CoreHttpRequestFileOptions): CoreHttpRequestCachedFile | undefined {
+    if (!path.slice(1).split('?').includes('.')) {
+      return
+    }
     const fileFromCache = options?.cache ? cache.get(path) : undefined
 
     if (fileFromCache) {
@@ -145,7 +150,6 @@ export default class CoreHttpRequest {
       }, {
         endStream: true
       })
-      this.log(`file: 304 "${file.path}"`)
       return this
     }
     this.stream.respond({
@@ -157,17 +161,16 @@ export default class CoreHttpRequest {
       [http2.constants.HTTP2_HEADER_CONTENT_TYPE]: lookup(file.path) || 'text/plain'
     })
     this.stream.end(file.buffer)
-    this.log(`file: 200 "${file.path}"`)
     return this
   }
 
-  file (path: string, options?: CoreHttpRequestFileOptions): CoreHttpRequest {
+  public file (path: string, options?: CoreHttpRequestFileOptions): CoreHttpRequest {
     const file = this._file(path, options)
 
     return file ? this.sendFile(file) : this.notFound()
   }
 
-  static (folder: string, options?: CoreHttpRequestStaticOptions): CoreHttpRequest | undefined {
+  public static (folder: string, options?: CoreHttpRequestStaticOptions): CoreHttpRequest | undefined {
     const path = folder + this.path
     const file = path.match(/.[a-z]{1,4}$/) ? this._file(path, options) : undefined
 
@@ -176,7 +179,7 @@ export default class CoreHttpRequest {
       : (options?.skip ? undefined : this.notFound())
   }
 
-  notFound () {
+  public notFound () {
     this.stream.respond({
       [http2.constants.HTTP2_HEADER_STATUS]: http2.constants.HTTP_STATUS_NOT_FOUND
     }, {
@@ -187,5 +190,37 @@ export default class CoreHttpRequest {
 
   private log (messages: string | string[]) {
     output.log('core-http-request', messages)
+  }
+
+  public param (key: string, numeric?: false): string | undefined
+  public param (key: string, numeric: true): number | undefined
+  public param (key: string, numeric?: boolean): number | string | undefined {
+    const index = this.currentPathSlices.indexOf(`:${key}`)
+
+    if (index !== -1) {
+      const value = this.pathSlices[index]
+
+      if (value !== undefined) {
+        if (numeric === true) {
+          return parseInt(value)
+        } else {
+          return value
+        }
+      }
+    }
+  }
+
+  public match (pathSlices: Array<string>): boolean {
+    if (pathSlices.length !== this.pathSlices.length) {
+      return false
+    }
+
+    for (const [index, slice] of pathSlices.entries()) {
+      if (slice[0] !== ':' && slice !== this.path[index]) {
+        return false
+      }
+    }
+    this.currentPathSlices = pathSlices
+    return true
   }
 }

@@ -1,6 +1,24 @@
 :root {
   --transition-default: 0.2s ease-in-out;
   --transition-linear: 0.2s linear;
-  --transition-fast: 0.2s ease-in-out;
-  --transition-linear-fast: 0.2s linear;
+  --transition-cubic: 0.2s cubic-bezier(0.64, 0.09, 0.08, 1);
+  --transition-fast: 0.1s ease-in-out;
+  --transition-linear-fast: 0.1s linear;
+  --transition-cubic-fast: 0.1s cubic-bezier(0.64, 0.09, 0.08, 1);
+  --transition-slow: 0.5s ease-in-out;
+  --transition-linear-slow: 0.5s linear;
+  --transition-cubic-slow: 0.5s cubic-bezier(0.64, 0.09, 0.08, 1);
+  --transition-slowest: 1s ease-in-out;
+  --transition-linear-slowest: 1s linear;
+  --transition-cubic-slowest: 1s cubic-bezier(0.64, 0.09, 0.08, 1);
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity var(--transition-slow);
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }

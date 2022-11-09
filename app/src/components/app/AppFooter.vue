@@ -1,5 +1,6 @@
 <template>
   <footer
+    v-show="$route.name && $route.meta.footer !== false"
     id="app-footer"
     class="app-footer"
   >

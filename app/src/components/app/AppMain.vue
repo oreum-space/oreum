@@ -1,26 +1,57 @@
 <template>
-  <router-view
-    v-if="$route.meta.main"
-    class="app-main"
-  />
-  <main
-    v-else
-    class="app-main"
-  >
-    <router-view />
-  </main>
+  <router-view v-slot="{ Component }">
+    <transition :name="$route.meta.transition || 'app-page'">
+      <main
+        v-if="!$route.meta.main"
+        class="app-main"
+      >
+        <component :is="Component" />
+      </main>
+      <component
+        v-else
+        class="app-main"
+        :is="Component"
+      />
+    </transition>
+  </router-view>
 </template>
 
-<script
-  setup
-  lang="ts"
->
+<style lang="scss">
+.app-page {
+  &_enter-active,
+  &-leave-active {
+    transition: var(--transition-linear-fast);
+  }
 
-</script>
+  &-enter-from,
+  &-leave-to {
+    opacity: 0;
+  }
+}
 
-<style
-  lang="scss"
-  scoped
->
+.sign-page {
+  &-enter-active {
+    transition: var(--transition-cubic-slow);
+  }
 
+  &-enter-from {
+    opacity: 0;
+    scale: 0;
+    translate: min(50vw, 640px) -50vh;
+  }
+
+  &-enter-to {
+    opacity: 1;
+    scale: 1;
+    translate: 0 0;
+  }
+
+  &-leave-active {
+    transition: var(--transition-linear-fast);
+  }
+
+  &-leave-to {
+    opacity: 0;
+  }
+}
 </style>

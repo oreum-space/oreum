@@ -12,6 +12,18 @@ const routes: Array<RouteRecordRaw> = [
     path: '/test',
     component: () => import('@/view/Test.vue'),
     meta: { main: true }
+  },
+  {
+    name: 'New Account',
+    path: '/new-account',
+    component: () => import('@/view/NewAccount.vue'),
+    meta: { main: true, header: false, footer: false, transition: 'sign-page' }
+  },
+  {
+    name: 'Authorization',
+    path: '/auth',
+    component: () => import('@/view/Authorization.vue'),
+    meta: { main: true, header: false, footer: false, transition: 'sign-page' }
   }
 ]
 

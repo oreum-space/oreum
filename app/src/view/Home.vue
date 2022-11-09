@@ -1,8 +1,13 @@
 <template>
   <main class="home">
-    <div class="app-scroll-tester">
-
-    </div>
+    <h1>
+      Проект в разработке
+    </h1>
+    <router-link to="/test">
+      <ui-button>
+        Test
+      </ui-button>
+    </router-link>
   </main>
 </template>
 
@@ -11,12 +16,8 @@
   lang="ts"
 >
 
+import UiButton from '@/components/ui/UiButton.vue'
 </script>
 
 <style lang="scss">
-.app-scroll-tester {
-  width: 100px;
-  height: calc(300vh - 64px - 64px);
-  background: repeating-linear-gradient(#121212, #DEDEDE 255px, #9198e5 255px, #9198e5 256px);
-}
 </style>

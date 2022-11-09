@@ -1,12 +1,9 @@
-import { readFileSync } from 'fs'
-import { gzipSync } from 'zlib'
 import CoreHttp from '../../core/core-http'
 import CoreHttpModule from '../../core/core-http-module'
 import CoreHttpRequest from '../../core/http/core-http-request'
 import * as output from '../../library/output'
 import sleep from '../../library/sleep'
-
-const app = gzipSync(readFileSync('./app-dist/index.html'))
+import profile from './profile'
 
 class AppModule {
   static async getString (request: CoreHttpRequest) {
@@ -78,5 +75,6 @@ export default new CoreHttpModule('application', {
     coreHttp.get('/test', AppModule.getTest)
     coreHttp.get(/\/*/, AppModule.getAppAssets, { priority: -1 })
     coreHttp.get(/\/*/, AppModule.getApp, { priority: -2 })
+    coreHttp.use(profile)
   }
 })

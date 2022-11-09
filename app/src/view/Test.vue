@@ -35,6 +35,22 @@
     <button @click="send">
       Send
     </button>
+    <table>
+      <thead>
+        <tr>
+          <th>
+            value
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="a in 37" :key="a">
+          <td>
+            {{ a }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </template>
 

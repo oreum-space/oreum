@@ -31,17 +31,20 @@ html, body {
   }
 }
 
-body {
-  padding-top: var(--app-header-height);
-}
-
 progress {
   width: 200px;
   margin-inline: calc(50% - 100px);
   margin-top: calc(33%);
 }
 
+.app-main, .app-header {
+  padding-inline: max(24px, 50vw - var(--app-default-max-width-half));
+}
+
 .app-main {
-  min-height: calc(var(--fvh) - var(--app-footer-min-height));
-  padding: 24px 16px;
+  min-height: var(--fvh);
+
+  &:not(&_full) {
+    padding-block: 80px 24px;
+  }
 }
