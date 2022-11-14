@@ -14,6 +14,12 @@ const routes: Array<RouteRecordRaw> = [
     meta: { main: true }
   },
   {
+    name: 'Postman',
+    path: '/postman',
+    component: () => import('@/view/Postman.vue'),
+    meta: { main: true }
+  },
+  {
     name: 'New Account',
     path: '/new-account',
     component: () => import('@/view/NewAccount.vue'),

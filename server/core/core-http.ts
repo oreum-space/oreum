@@ -3,18 +3,21 @@ import http2, { Http2SecureServer, IncomingHttpHeaders, ServerHttp2Stream } from
 import ErrnoException = NodeJS.ErrnoException
 import * as output from './../library/output'
 import CoreHttpHandler, { CoreHttpFunction, CoreHttpHandlerOptions } from './http/core-http-handler'
-import CoreHttpRouter from './http/core-http-router'
 import CoreHttpRequest from './http/core-http-request'
+
+export type CoreHttpPath = string | RegExp | { (path: string): boolean }
 
 export default class CoreHttp {
   private readonly port: number
   private readonly server: Http2SecureServer
-  private readonly handlers: Array<CoreHttpHandler | CoreHttpRouter>
+  private readonly handlers: Array<CoreHttpHandler>
 
   constructor () {
     this.port = process.properties?.http?.port ?? 443
     this.handlers = []
-    this.server = http2.createSecureServer({ ...CoreHttp.certs })
+    this.server = http2.createSecureServer({
+      ...CoreHttp.certs
+    })
     this.server.on('stream', CoreHttp.onStream.bind(this))
   }
 
@@ -24,17 +27,13 @@ export default class CoreHttp {
     try {
       for (const handler of this.handlers) {
         if (await handler.handle(request) instanceof CoreHttpRequest) {
+          console.log('stop at ', handler['path'])
           return
         }
       }
     } catch (error) {
       if (!stream.closed) {
         stream.close(500)
-        // stream.respond({
-        //   ':status': 500
-        // }, {
-        //   endStream: true
-        // })
       }
       output.error('core-http on-stream', error instanceof Error ? error.message : `${error}`)
     }
@@ -62,11 +61,6 @@ export default class CoreHttp {
 
   public listen () {
     this.handlers.sort(CoreHttp.handlerSorter)
-    for (const handler of this.handlers) {
-      if (handler instanceof CoreHttpRouter) {
-        handler.sort()
-      }
-    }
     this.server.listen(this.port)
   }
 
@@ -78,15 +72,28 @@ export default class CoreHttp {
     }
   }
 
-  public get (path: string | RegExp, handler: CoreHttpFunction, options?: CoreHttpHandlerOptions) {
+  public get (path: CoreHttpPath, handler: CoreHttpFunction, options?: CoreHttpHandlerOptions): this {
     this.handlers.push(new CoreHttpHandler('GET', path, handler, options))
+    return this
   }
 
-  public use (router: CoreHttpRouter) {
-    this.handlers.push(router)
+  public post (path: CoreHttpPath, handler: CoreHttpFunction, options?: CoreHttpHandlerOptions): this {
+    this.handlers.push(new CoreHttpHandler('POST', path, handler, options))
+    return this
   }
 
-  // TODO: post
-  // TODO: patch
-  // TODO: delete
+  public patch (path: CoreHttpPath, handler: CoreHttpFunction, options?: CoreHttpHandlerOptions): this {
+    this.handlers.push(new CoreHttpHandler('PATCH', path, handler, options))
+    return this
+  }
+
+  public delete (path: CoreHttpPath, handler: CoreHttpFunction, options?: CoreHttpHandlerOptions): this {
+    this.handlers.push(new CoreHttpHandler('DELETE', path, handler, options))
+    return this
+  }
+
+  public use (user: (this: CoreHttp) => void): this {
+    user.call(this)
+    return this
+  }
 }

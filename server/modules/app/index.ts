@@ -3,7 +3,6 @@ import CoreHttpModule from '../../core/core-http-module'
 import CoreHttpRequest from '../../core/http/core-http-request'
 import * as output from '../../library/output'
 import sleep from '../../library/sleep'
-import profile from './profile'
 
 class AppModule {
   static async getString (request: CoreHttpRequest) {
@@ -45,7 +44,10 @@ class AppModule {
 
   static async getTest (request: CoreHttpRequest) {
     const buffers = [...'Hello world!'].map(_ => Buffer.from(_, 'utf8'))
-    request.respond(undefined, {
+    request.respond({
+      ':status': 200,
+      'content-type': 'plain/text'
+    }, {
       endStream: false,
       waitForTrailers: true
     })
@@ -70,11 +72,9 @@ class AppModule {
 
 export default new CoreHttpModule('application', {
   httpCreate (coreModule: CoreHttpModule, coreHttp: CoreHttp): void | Promise<void> {
-    coreHttp.get('/string', AppModule.getString)
-    coreHttp.get('/success', AppModule.getSuccess)
-    coreHttp.get('/test', AppModule.getTest)
-    coreHttp.get(/\/*/, AppModule.getAppAssets, { priority: -1 })
-    coreHttp.get(/\/*/, AppModule.getApp, { priority: -2 })
-    coreHttp.use(profile)
+    coreHttp
+      .get(/\/*/, AppModule.getAppAssets, { priority: -1 })
+      .get('/', AppModule.getApp, { priority: 1000 - 7 })
+      .get(path => !path.startsWith('/api'), AppModule.getApp, { priority: -2})
   }
 })

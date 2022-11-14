@@ -65,7 +65,7 @@ onMounted(function () {
   }
 
   function scrollHandler () {
-    if (!window.matchMedia('(max-width: 768px) or (hover: none)').matches) {
+    if (!window.matchMedia('(max-width: 768px)').matches && !window.matchMedia('(hover: none)').matches) {
       calculateHeight()
     }
   }
@@ -75,7 +75,6 @@ onMounted(function () {
   resizeObserver.observe(html)
 
   onUnmounted(function () {
-    console.log('onUnmounted')
     removeEventListener('scroll', scrollHandler)
     removeEventListener('resize', scrollHandler)
     resizeObserver.unobserve(html)
@@ -119,7 +118,7 @@ function pointerdown (event: PointerEvent): void {
 function pointerup (event: PointerEvent): void {
   removeEventListener('pointermove', pointermove)
   scrollbar.value!.classList.remove('app-scrollbar_active')
-  document.documentElement.classList.remove('prevent-scrolling_scrollbar')
+  document.documentElement?.classList.remove('prevent-scrolling_scrollbar')
 }
 </script>
 
@@ -171,7 +170,13 @@ function pointerup (event: PointerEvent): void {
   }
 }
 
-@media (max-width: 768px) or (hover: none) {
+@media (max-width: 768px) {
+  .app-scrollbar {
+    display: none !important;
+  }
+}
+
+@media (hover: none) {
   .app-scrollbar {
     display: none !important;
   }

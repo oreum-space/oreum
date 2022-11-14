@@ -94,7 +94,7 @@ export default class CoreHttpRequest {
     this.outgoingHeader[key] = value
   }
 
-  public respond (headers?: OutgoingHttpHeaders, options?: ServerStreamResponseOptions): CoreHttpRequest {
+  public respond (headers?: OutgoingHttpHeaders, options?: ServerStreamResponseOptions): this {
     this.stream.respond({
       ...this.outgoingHeader,
       ...headers
@@ -105,7 +105,7 @@ export default class CoreHttpRequest {
   public end (cb?: () => void): this
   public end (chunk: any, cb?: () => void): this
   public end (chunk: any, encoding?: BufferEncoding, cb?: () => void): this
-  public end (a?: any, b?: any, c?: any): CoreHttpRequest {
+  public end (a?: any, b?: any, c?: any): this {
     this.stream.end(a, b, c)
     return this
   }
@@ -116,27 +116,29 @@ export default class CoreHttpRequest {
     return this
   }
 
+  json (data: unknown, headers?: OutgoingHttpHeaders): this {
+    return this
+      .respond({ ...this.outgoingHeader, ...headers, 'content-type': 'application/json;charset=utf-8' })
+      .end(JSON.stringify(data))
+  }
+
   private _file (path: string, options?: CoreHttpRequestFileOptions): CoreHttpRequestCachedFile | undefined {
-    if (!path.slice(1).split('?').includes('.')) {
-      return
-    }
     const fileFromCache = options?.cache ? cache.get(path) : undefined
 
     if (fileFromCache) {
       return fileFromCache
-    } else {
-      try {
-        const newFile = new CoreHttpRequestCachedFile(path, options?.cache)
+    }
+    try {
+      const newFile = new CoreHttpRequestCachedFile(path, options?.cache)
 
-        if (options?.cache) {
-          cache.set(newFile.toString(), newFile)
-        }
+      if (options?.cache) {
+        cache.set(newFile.toString(), newFile)
+      }
 
-        return newFile
-      } catch (error) {
-        if (error instanceof Error) {
-          output.error('core-http-request file', error.message)
-        }
+      return newFile
+    } catch (error) {
+      if (error instanceof Error) {
+        output.error('core-http-request file', error.message)
       }
     }
   }
@@ -152,6 +154,7 @@ export default class CoreHttpRequest {
       })
       return this
     }
+    file.checkFromDisk()
     this.stream.respond({
       [http2.constants.HTTP2_HEADER_STATUS]: http2.constants.HTTP_STATUS_OK,
       [http2.constants.HTTP2_HEADER_CACHE_CONTROL]: 'no-cache',
@@ -167,16 +170,30 @@ export default class CoreHttpRequest {
   public file (path: string, options?: CoreHttpRequestFileOptions): CoreHttpRequest {
     const file = this._file(path, options)
 
-    return file ? this.sendFile(file) : this.notFound()
+    console.log('file', path, !!file)
+
+    try {
+      return file ? this.sendFile(file) : this.notFound()
+    } catch {
+      return this.notFound()
+    }
   }
 
   public static (folder: string, options?: CoreHttpRequestStaticOptions): CoreHttpRequest | undefined {
+    if (options?.skip && !this.path.slice(1).includes('.')) {
+      return undefined
+    }
+
     const path = folder + this.path
     const file = path.match(/.[a-z]{1,4}$/) ? this._file(path, options) : undefined
 
-    return file
-      ? this.sendFile(file)
-      : (options?.skip ? undefined : this.notFound())
+    try {
+      return file
+        ? this.sendFile(file)
+        : (options?.skip ? undefined : this.notFound())
+    } catch {
+      this.notFound()
+    }
   }
 
   public notFound () {
@@ -222,5 +239,18 @@ export default class CoreHttpRequest {
     }
     this.currentPathSlices = pathSlices
     return true
+  }
+
+  async bodyJson (): Promise<ReturnType<JSON['parse']>> {
+    try {
+      return JSON.parse(await new Promise<string>(resolve => {
+        this.stream.on('data', (data: Buffer) => {
+          resolve(data.toString())
+        })
+      }))
+    } catch (error) {
+      this.respond({ ':status': 422 }, { endStream: true })
+      throw (error)
+    }
   }
 }

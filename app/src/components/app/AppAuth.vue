@@ -36,4 +36,10 @@ import UiButton from '@/components/ui/UiButton.vue'
   display: flex;
   gap: 12px;
 }
+
+@media (max-width: 768px) {
+  .app-auth {
+    display: none;
+  }
+}
 </style>

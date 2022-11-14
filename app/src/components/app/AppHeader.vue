@@ -45,6 +45,21 @@ const profile = useProfile()
   box-shadow: 0 3px 5px rgb(0 0 0 / 4%), 0 0 2px rgb(0 0 0 / 10%), 0 1px 4px rgb(0 0 0 / 16%);
   padding-block: 8px;
   top: 0;
+  z-index: 1;
+
+  @media screen and (display-mode: standalone) {
+    top: -16px;
+    height: calc(var(--app-header-height) + 16px);
+  }
+
+  @media (max-width: 768px) {
+
+    &__space {
+      display: none;
+    }
+
+    justify-content: center;
+  }
 
   &__space {
     flex: 1 1 0;

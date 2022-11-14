@@ -18,7 +18,8 @@
 <style lang="scss">
 .app-footer {
   width: 100%;
-  background-color: var(--surface-c);
+  --background-color: var(--surface-card);
+  background-color: var(--background-color);
   height: var(--app-footer-min-height);
 }
 </style>

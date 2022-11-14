@@ -5,5 +5,8 @@
       "key": "./.cert/key.pem",
       "cert": "./.cert/cert.pem"
     }
+  },
+  "mongoose": {
+    "url": "mongodb://127.0.0.1/oreum"
   }
 }

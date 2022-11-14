@@ -7,3 +7,13 @@ createApp(App)
   .use(router)
   .use(pinia)
   .mount('body')
+
+if ('serviceWorker' in navigator && location.hostname !== 'localhost') {
+  void (async function () {
+    try {
+      await navigator.serviceWorker.register('./pwa/worker.js')
+    } catch {
+      console.warn('SSL is not valid!')
+    }
+  })()
+}

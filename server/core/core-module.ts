@@ -1,14 +1,14 @@
 import { error, info, log, warning } from '../library/output'
 
-export interface CoreModuleOptions {
-  create ?(coreModule: CoreModule): void | Promise<void>
-  start ?(coreModule: CoreModule): void | Promise<void>
-  destroy ?(coreModule: CoreModule): void | Promise<void>
+export interface CoreModuleOptions<T = CoreModule> {
+  create ?(coreModule: T): void | Promise<void>
+  start ?(coreModule: T): void | Promise<void>
+  destroy ?(coreModule: T): void | Promise<void>
 }
 
 export default class CoreModule {
   public readonly name: string
-  protected options: CoreModuleOptions
+  protected options: CoreModuleOptions<this>
 
   constructor (name: string, options: CoreModuleOptions) {
     this.name = name

@@ -8,6 +8,9 @@ type ProcessProperties = {
       key: string,
       passphrase?: string
     }
+  },
+  mongoose: {
+    url: string
   }
 }
 

@@ -53,12 +53,15 @@ button,
   color: var(--primary-color-text);
   border-radius: 4px;
   font-size: 16px;
-  display: flex;
+  display: inline-flex;
   justify-content: center;
   gap: 8px;
   align-items: center;
   line-height: 20px;
   font-weight: 600;
+  @media (min-width: 769px) {
+    width: fit-content;
+  }
   white-space: nowrap;
   font-family: inherit;
   transition: background-color var(--transition-cubic-fast);
