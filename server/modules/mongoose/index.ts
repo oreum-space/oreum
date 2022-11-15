@@ -22,7 +22,9 @@ class CoreMongooseModule extends CoreModule {
 
     try {
       output.info('core-mongoose-module', this.attempts ? `Reconnecting... (attempt: ${this.attempts})` : 'Connecting...')
-      await connect(this.url)
+      await connect(this.url, CoreMongooseModule.options)
+      await sleep(1000)
+      output.raw('\x1B[F')
       output.info('core-mongoose-module', 'Connected successfully!')
     } catch (error) {
       output.warning('core-mongoose-module', 'Failed to connect!, reconnecting in 5 seconds...')

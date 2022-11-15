@@ -1,5 +1,4 @@
-import { writeSync } from 'fs'
-import { error, info, log, warning } from '../library/output'
+import output from '../library/output'
 import CoreModule from './core-module'
 import CoreHttp from './core-http'
 import CoreHttpModule from './core-http-module'
@@ -26,24 +25,29 @@ export default class Core {
     return this
   }
 
-  private async _mount (): Promise<void> {
+  async #mount (): Promise<void> {
+    this.#info('Creating...')
     await this.create()
-    this.info('Created!')
+    this.#info('Starting...')
     await this.start()
-    this.info('Started!')
   }
 
   public mount (): void {
     this
-      ._mount()
+      .#mount()
       .then(() => {
-        writeSync(1, '\u001b[1J\u001b[0;0H')
-        this.info([
+        this.#info([
           'Successfully mounted!',
           `➜  Local: https://localhost${
             process.properties.http.port !== 443 ? ':' + process.properties.http.port : ''
           }`
         ])
+        let a = ''
+        let b = process.stdout.rows - 4
+        while (b--) {
+          a += '\n'
+        }
+        output.raw(new Array(process.stdout.rows - 4).fill('\n').join('') + '\x1B[4;0H')
       })
   }
 
@@ -81,7 +85,7 @@ export default class Core {
     return this
   }
 
-  private async destroy (): Promise<this> {
+  /* private async destroy (): Promise<this> {
     for (const module of this.modules) {
       try {
         if (module instanceof CoreHttpModule) {
@@ -94,27 +98,29 @@ export default class Core {
     }
 
     return this
-  }
+  } */
 
-  info (messages: string | Array<string>): this {
-    info('core', messages)
+  #info (messages: string | Array<string>): this {
+    output.info('core', messages)
     return this
   }
 
-  log (messages: string | Array<string>): this {
+  /*
+  #log (messages: string | Array<string>): this {
     log('core', messages)
     return this
   }
 
-  warning (messages: string | Array<string>): this {
+  #warning (messages: string | Array<string>): this {
     warning('core', messages)
     return this
   }
 
-  error (messages: string | Array<string>): this {
+  #error (messages: string | Array<string>): this {
     error('core', messages)
     return this
   }
+  */
 
   public static new (): Core {
     return new Core()

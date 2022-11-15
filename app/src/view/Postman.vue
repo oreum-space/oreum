@@ -7,15 +7,19 @@
       <div class="ui-input-inline">
         <ui-button
           v-for="m of methods"
+          size="small"
           :key="m"
           :seriousness="m === method ? 'primary' : 'passive'"
           @click="method = m"
         >
-          {{ m }}
+          <code style="font-size: 14px">
+            {{ m }}
+          </code>
         </ui-button>
       </div>
       <ui-input-text
         class="flex-grow"
+        width="480px"
         label="Url"
         v-model="url"
       />
@@ -57,7 +61,7 @@ import UiInputText from '@/components/ui/input/UiInputText.vue'
 import UiInputTextarea from '@/components/ui/input/UiInputTextarea.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import spdy, { SpeedyMethod } from '@/library/spdy'
-import { ref } from 'vue'
+import { computed, ref, WritableComputedRef } from 'vue'
 import UiCard from "@/components/ui/UiCard.vue";
 
 const methods = [
@@ -70,9 +74,23 @@ const methods = [
   'OPTIONS'
 ] as Readonly<Array<SpeedyMethod>>
 
-const method = ref<SpeedyMethod>(methods[0])
-const url = ref<string>('https://localhost/api/')
-const requestBody = ref<string>('{\n  \n}')
+function localRef(key: string, value: string) {
+  const l = localStorage.getItem(key)
+  const _ = ref<string>(l || value)
+  return computed<string>({
+    get () {
+      return _.value
+    },
+    set (value: string): void {
+      localStorage.setItem(key, value)
+      _.value = value
+    }
+  })
+}
+
+const method = localRef('postman:method', methods[0]) as WritableComputedRef<SpeedyMethod>
+const url = localRef('postman:url', 'https://localhost/api/')
+const requestBody = localRef('postman:requestBody', '{\n  \n}')
 const previousRequestBody = ref<string>('')
 const sending = ref<boolean>(false)
 const responseBody = ref<string>('')
@@ -101,12 +119,15 @@ async function send () {
       console.info('text:', text)
       responseBody.value = text
     }
+    console.log('response:', response)
 
   } catch (error) {
+    console.log('catch')
     if (error instanceof Error) {
       lastResponseStatus.value = 499
       responseBody.value = error.message
     }
+    console.dir(error)
     console.error(error)
   } finally {
     lastResponseTime.value = new Date()

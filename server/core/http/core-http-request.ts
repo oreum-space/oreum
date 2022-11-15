@@ -1,7 +1,7 @@
-import { readFileSync, Stats, statSync } from 'fs'
-import http2, { IncomingHttpHeaders, ServerHttp2Stream, OutgoingHttpHeaders, ServerStreamResponseOptions } from 'http2'
-import { gzipSync } from 'zlib'
 import output from '../../library/output'
+import http2, { IncomingHttpHeaders, ServerHttp2Stream, OutgoingHttpHeaders, ServerStreamResponseOptions } from 'http2'
+import { readFileSync, statSync } from 'fs'
+import { gzipSync } from 'zlib'
 import { lookup } from 'mime-types'
 
 const cache = new Map<string, CoreHttpRequestCachedFile>()
@@ -25,19 +25,18 @@ class CoreHttpRequestCachedFile {
   private readonly force: boolean
   private _buffer: Buffer
   private mtime: Date
-  private stats: Stats
 
   constructor (path: string, cache?: number) {
     this.path = path
     this.force = cache === CacheLevel.FORCE_CACHE
-    this.stats = statSync(this.path)
-    if (this.stats.isFile()) {
+    const stats = statSync(this.path)
+    if (stats.isFile()) {
       this._buffer = gzipSync(readFileSync(this.path))
       this.mtime = cache === CacheLevel.CACHE
-        ? new Date(new Date(statSync(this.path).mtime).toUTCString())
+        ? new Date(new Date(stats.mtime).toUTCString())
         : new Date(0)
     } else {
-      throw new Error(`Directory cannot be sent! [${path}]`)
+      throw new Error(`Directory cannot be sent! [${ path }]`)
     }
   }
 
@@ -49,8 +48,10 @@ class CoreHttpRequestCachedFile {
     return new Date(this.mtime).toUTCString()
   }
 
-  checkFromDisk (): boolean {
-    if (this.force) { return false }
+  public checkFromDisk (): boolean {
+    if (this.force) {
+      return false
+    }
     const mtime = new Date(new Date(statSync(this.path).mtime).toUTCString())
     if (+this.mtime !== +mtime) {
       this.mtime = mtime
@@ -60,22 +61,39 @@ class CoreHttpRequestCachedFile {
     return false
   }
 
-  wasModifiedSince (modifiedSince: Date): boolean {
-    if (this.force) { return false }
+  public wasModifiedSince (modifiedSince: Date): boolean {
+    if (this.force) {
+      return false
+    }
     return modifiedSince < this.mtime
   }
 
-  toString (): string {
+  public toString (): string {
     return this.path
   }
 }
 
+type CoreHttpRequestErrorReason = 'json' | 'unknown'
+
+class CoreHttpRequestError extends Error {
+  public closed: boolean
+  public reason: CoreHttpRequestErrorReason
+
+  constructor (error?: Error, reason?: CoreHttpRequestErrorReason, closed?: boolean)
+  constructor (message?: string, reason?: CoreHttpRequestErrorReason, closed?: boolean)
+  constructor (param?: string | Error, reason?: CoreHttpRequestErrorReason, closed?: boolean) {
+    super(param instanceof Error ? param.message : param)
+    this.closed = !!closed
+    this.reason = reason || 'unknown'
+  }
+}
+
 export default class CoreHttpRequest {
-  readonly stream: ServerHttp2Stream
-  readonly headers: IncomingHttpHeaders
-  private readonly outgoingHeader: OutgoingHttpHeaders
   public readonly method: string
   public readonly path: string
+  public readonly stream: ServerHttp2Stream
+  public readonly headers: IncomingHttpHeaders
+  private readonly outgoingHeader: OutgoingHttpHeaders
   private readonly pathSlices: Array<string>
   private currentPathSlices: Array<string>
 
@@ -90,7 +108,11 @@ export default class CoreHttpRequest {
     this.currentPathSlices = []
   }
 
-  public setOutgoingHeader (key: string, value: string | string[] | number) {
+  public isRequestError (error: unknown): error is CoreHttpRequestError {
+    return error instanceof CoreHttpRequestError
+  }
+
+  public setResponseHeader (key: string, value: string | string[] | number) {
     this.outgoingHeader[key] = value
   }
 
@@ -116,13 +138,13 @@ export default class CoreHttpRequest {
     return this
   }
 
-  json (data: unknown, headers?: OutgoingHttpHeaders): this {
+  public json (data: unknown, headers?: OutgoingHttpHeaders): this {
     return this
       .respond({ ...this.outgoingHeader, ...headers, 'content-type': 'application/json;charset=utf-8' })
       .end(JSON.stringify(data))
   }
 
-  private _file (path: string, options?: CoreHttpRequestFileOptions): CoreHttpRequestCachedFile | undefined {
+  #file (path: string, options?: CoreHttpRequestFileOptions): CoreHttpRequestCachedFile | undefined {
     const fileFromCache = options?.cache ? cache.get(path) : undefined
 
     if (fileFromCache) {
@@ -143,7 +165,7 @@ export default class CoreHttpRequest {
     }
   }
 
-  private sendFile (file: CoreHttpRequestCachedFile) {
+  #sendFile (file: CoreHttpRequestCachedFile) {
     const lastModified = this.headers['if-modified-since']
 
     if (lastModified && !file.wasModifiedSince(new Date(lastModified))) {
@@ -168,12 +190,10 @@ export default class CoreHttpRequest {
   }
 
   public file (path: string, options?: CoreHttpRequestFileOptions): CoreHttpRequest {
-    const file = this._file(path, options)
-
-    console.log('file', path, !!file)
+    const file = this.#file(path, options)
 
     try {
-      return file ? this.sendFile(file) : this.notFound()
+      return file ? this.#sendFile(file) : this.notFound()
     } catch {
       return this.notFound()
     }
@@ -185,12 +205,14 @@ export default class CoreHttpRequest {
     }
 
     const path = folder + this.path
-    const file = path.match(/.[a-z]{1,4}$/) ? this._file(path, options) : undefined
+    const file = path.match(/.[a-z]{1,4}$/) ? this.#file(path, options) : undefined
 
     try {
       return file
-        ? this.sendFile(file)
-        : (options?.skip ? undefined : this.notFound())
+        ? this.#sendFile(file)
+        : (
+          options?.skip ? undefined : this.notFound()
+        )
     } catch {
       this.notFound()
     }
@@ -205,14 +227,10 @@ export default class CoreHttpRequest {
     return this
   }
 
-  private log (messages: string | string[]) {
-    output.log('core-http-request', messages)
-  }
-
-  public param (key: string, numeric?: false): string | undefined
-  public param (key: string, numeric: true): number | undefined
-  public param (key: string, numeric?: boolean): number | string | undefined {
-    const index = this.currentPathSlices.indexOf(`:${key}`)
+  public header (key: string, numeric?: false): string | undefined
+  public header (key: string, numeric: true): number | undefined
+  public header (key: string, numeric?: boolean): number | string | undefined {
+    const index = this.currentPathSlices.indexOf(`:${ key }`)
 
     if (index !== -1) {
       const value = this.pathSlices[index]
@@ -228,10 +246,7 @@ export default class CoreHttpRequest {
   }
 
   public match (pathSlices: Array<string>): boolean {
-    if (pathSlices.length !== this.pathSlices.length) {
-      return false
-    }
-
+    if (pathSlices.length !== this.pathSlices.length) return false
     for (const [index, slice] of pathSlices.entries()) {
       if (slice[0] !== ':' && slice !== this.path[index]) {
         return false
@@ -241,7 +256,32 @@ export default class CoreHttpRequest {
     return true
   }
 
-  async bodyJson (): Promise<ReturnType<JSON['parse']>> {
+  public serverError (): this {
+    return this.respond({ ':status': 500 }, { endStream: true })
+  }
+
+  public badRequest (body?: unknown): this {
+    return body ?
+      this.json(body, { ':status': 400 }) :
+      this.respond({ ':status': 400 }, { endStream: true })
+  }
+
+  // Warning: The client should not repeat this request without modification.
+  public unprocessableEntity () {
+    this.respond({ ':status': 422 }, { endStream: true })
+  }
+
+  public closeIfBodyJsonError (error: unknown): error is CoreHttpRequestError | false {
+    if (this.isRequestError(error)) {
+      if (error.reason === 'json') {
+        this.unprocessableEntity()
+        return true
+      }
+    }
+    return false
+  }
+
+  public async bodyJSON (): Promise<ReturnType<JSON['parse']>> {
     try {
       return JSON.parse(await new Promise<string>(resolve => {
         this.stream.on('data', (data: Buffer) => {
@@ -249,8 +289,14 @@ export default class CoreHttpRequest {
         })
       }))
     } catch (error) {
-      this.respond({ ':status': 422 }, { endStream: true })
-      throw (error)
+      this.unprocessableEntity()
+      throw (
+        new CoreHttpRequestError(
+          error instanceof Error ? error : new Error('unknown at CoreHttpRequest.bodyJSON()'),
+          'json',
+          true
+        )
+      )
     }
   }
 }

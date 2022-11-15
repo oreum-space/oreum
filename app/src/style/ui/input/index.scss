@@ -10,7 +10,7 @@
   line-height: 20px;
   border-radius: 4px;
   font-family: var(--default-font-family);
-  width: 240px;
+  width: var(--width, 240px);
   max-width: 100%;
 
   @media (max-width: 768px) {

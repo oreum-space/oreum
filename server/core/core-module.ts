@@ -21,7 +21,7 @@ export default class CoreModule {
   }
 
   public async start (): Promise<this> {
-    await this.options.create?.(this)
+    await this.options.start?.(this)
     return this
   }
 

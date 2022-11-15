@@ -10,6 +10,7 @@
       :autocomplete="autocomplete"
       :maxlength="maxlength"
       :disabled="_disabled"
+      :style="{ '--width': width }"
       @focus="onfocus"
       @blur="onblur"
       @mouseenter="onfocus"
@@ -38,6 +39,7 @@ type Props = {
   maxlength?: string,
   autocomplete?: string,
   datalist?: Array<string>,
+  width?: string | number,
   type?: 'password' | 'email' | 'text'
 }
 

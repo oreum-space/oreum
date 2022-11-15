@@ -3,7 +3,7 @@ import path from 'path'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 
-export default defineConfig({
+module.exports = defineConfig({
   root: './app/',
   plugins: [vue()],
   server: {
@@ -26,6 +26,7 @@ export default defineConfig({
   },
   build: {
     outDir: './../app-dist',
+    cssCodeSplit: false,
     emptyOutDir: true
   },
   resolve: {

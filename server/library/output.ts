@@ -18,6 +18,10 @@ function out (name: string, messages: string | Array<string>, type: number) {
   }\n`)
 }
 
+export function raw (string: string) {
+  writeSync(1, string)
+}
+
 export function info (name: string, messages: string | Array<string>) {
   out(name, messages, 0)
 }
@@ -35,6 +39,7 @@ export function error (name: string, messages: string | Array<string>) {
 }
 
 export default {
+  raw,
   info,
   log,
   warning,

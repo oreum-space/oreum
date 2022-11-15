@@ -16,7 +16,11 @@ export default class CoreHttp {
     this.port = process.properties?.http?.port ?? 443
     this.handlers = []
     this.server = http2.createSecureServer({
-      ...CoreHttp.certs
+      ...CoreHttp.certs,
+      origins: [
+        'https://localhost',
+        'https://localhost:8443'
+      ]
     })
     this.server.on('stream', CoreHttp.onStream.bind(this))
   }
@@ -24,22 +28,16 @@ export default class CoreHttp {
   private static async onStream (this: CoreHttp, stream: ServerHttp2Stream, headers: IncomingHttpHeaders) {
     const request = new CoreHttpRequest(stream, headers)
 
-    try {
-      for (const handler of this.handlers) {
-        if (await handler.handle(request) instanceof CoreHttpRequest) {
-          console.log('stop at ', handler['path'])
-          return
-        }
+    for (const handler of this.handlers) {
+      try {
+        if (await handler.handle(request) instanceof CoreHttpRequest) return
+      } catch (error) {
+        output.error('core-http on-stream', error instanceof Error ? error.message : `${error}`)
+        request.serverError()
+        return
       }
-    } catch (error) {
-      if (!stream.closed) {
-        stream.close(500)
-      }
-      output.error('core-http on-stream', error instanceof Error ? error.message : `${error}`)
     }
-    if (!stream.closed) {
-      request.notFound()
-    }
+    request.notFound()
   }
 
   private static onError (error: ErrnoException, stream: ServerHttp2Stream) {
@@ -62,6 +60,7 @@ export default class CoreHttp {
   public listen () {
     this.handlers.sort(CoreHttp.handlerSorter)
     this.server.listen(this.port)
+    output.info('core-http', `Listening port ${this.port}`)
   }
 
   private static get certs (): { key: Buffer, cert: Buffer, passphrase: string | undefined } {
