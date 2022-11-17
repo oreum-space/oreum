@@ -5,3 +5,4 @@
 /app-dist/
 
 yarn.lock
+/yarn-error.log
