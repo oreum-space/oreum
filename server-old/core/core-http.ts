@@ -32,8 +32,16 @@ export default class CoreHttp {
       try {
         if (await handler.handle(request) instanceof CoreHttpRequest) return
       } catch (error) {
-        output.error('core-http on-stream', error instanceof Error ? error.message : `${error}`)
-        request.serverError()
+        try {
+          if (!request.stream.headersSent) {
+            request.serverError()
+          }
+          if (!request.stream.closed) {
+            request.stream.close(500)
+          }
+        } finally {
+          output.error('core-http on-stream', error instanceof Error ? error.message : `${error}`)
+        }
         return
       }
     }

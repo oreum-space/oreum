@@ -13,7 +13,8 @@ enum CacheLevel {
 }
 
 interface CoreHttpRequestFileOptions {
-  cache?: CacheLevel
+  cache?: CacheLevel,
+  afterRead?: (file: Buffer, mtime: Date) => Buffer
 }
 
 interface CoreHttpRequestStaticOptions extends CoreHttpRequestFileOptions {
@@ -23,25 +24,32 @@ interface CoreHttpRequestStaticOptions extends CoreHttpRequestFileOptions {
 class CoreHttpRequestCachedFile {
   public readonly path: string
   private readonly force: boolean
-  private _buffer: Buffer
+  #buffer: Buffer
   private mtime: Date
+  readonly #afterRead?: CoreHttpRequestFileOptions['afterRead']
 
-  constructor (path: string, cache?: number) {
+  constructor (path: string, cache?: number, afterRead?: CoreHttpRequestFileOptions['afterRead']) {
+    this.#afterRead = afterRead
     this.path = path
     this.force = cache === CacheLevel.FORCE_CACHE
     const stats = statSync(this.path)
     if (stats.isFile()) {
-      this._buffer = gzipSync(readFileSync(this.path))
       this.mtime = cache === CacheLevel.CACHE
         ? new Date(new Date(stats.mtime).toUTCString())
         : new Date(0)
+      this.#buffer = this.#readFile()
     } else {
       throw new Error(`Directory cannot be sent! [${ path }]`)
     }
   }
 
+  #readFile (): Buffer {
+    const buffer = readFileSync(this.path)
+    return gzipSync(this.#afterRead?.(buffer, this.mtime) ?? buffer)
+  }
+
   public get buffer () {
-    return this._buffer
+    return this.#buffer
   }
 
   public get lastModified (): string {
@@ -55,7 +63,7 @@ class CoreHttpRequestCachedFile {
     const mtime = new Date(new Date(statSync(this.path).mtime).toUTCString())
     if (+this.mtime !== +mtime) {
       this.mtime = mtime
-      this._buffer = gzipSync(readFileSync(this.path))
+      this.#buffer = this.#readFile()
       return true
     }
     return false
@@ -151,7 +159,7 @@ export default class CoreHttpRequest {
       return fileFromCache
     }
     try {
-      const newFile = new CoreHttpRequestCachedFile(path, options?.cache)
+      const newFile = new CoreHttpRequestCachedFile(path, options?.cache, options?.afterRead)
 
       if (options?.cache) {
         cache.set(newFile.toString(), newFile)
