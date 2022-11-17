@@ -1,6 +1,3 @@
-type SpeedyResponseType =
-  'stream;plain/text'
-
 export type SpeedyMethod =
   'GET' |
   'PUT' |
@@ -27,19 +24,65 @@ class SpeedyRequest<ResponseBody = unknown> {
 const WITHOUT_BODY_REQUESTS = ['GET', 'HEAD'] as Readonly<Array<SpeedyMethod>>
 
 class SpeedyResponse<ResponseBody = unknown> {
-  request: SpeedyRequest<ResponseBody>
-  promiseResponse: Promise<Response>
+  public request: SpeedyRequest<ResponseBody>
+  readonly #promiseResponse: Promise<Response>
 
   constructor (request: SpeedyRequest) {
     this.request = request
-    this.promiseResponse = fetch(request.url, {
+
+    console.log('signal 0')
+    const controller = new AbortController()
+    const signal = controller.signal
+    console.log('signal 1')
+
+    signal.onabort = function (event) {
+      console.log('fetch aborted event', event)
+    }
+
+    console.log('signal 2')
+
+    this.#promiseResponse = fetch(request.url, {
       method: request.method,
-      body: WITHOUT_BODY_REQUESTS.includes(request.method) ? null : request.body
+      body: WITHOUT_BODY_REQUESTS.includes(request.method) ? null : request.body,
+      signal
     })
+    console.log('signal 3')
   }
 
-  async json (): Promise<ResponseBody>  {
-    const response = await this.promiseResponse
+  static #utf8decoder = new TextDecoder()
+
+  public get response () {
+    return this.#promiseResponse
+  }
+
+  public async *streamJson () {
+    const response = await this.response
+    console.log('from *streamJson:', response.body)
+    if (!response.body) {
+      throw new Error()
+    }
+    const reader = response.body.getReader()
+    let read = await reader.read()
+    let data = SpeedyResponse.#utf8decoder.decode(read.value)
+
+    while (!read.done) {
+      await new Promise(_ => requestAnimationFrame(_))
+      read = await reader.read()
+      const newData = SpeedyResponse.#utf8decoder.decode(read.value)
+      if (newData) {
+        data += SpeedyResponse.#utf8decoder.decode(read.value)
+        console.log('from *streamJson read:', data)
+        yield data
+      }
+    }
+
+    console.log('from *streamJson data:', data)
+
+    return data
+  }
+
+  public async json (): Promise<ResponseBody>  {
+    const response = await this.response
     return (await response.json() as ResponseBody)
   }
 }

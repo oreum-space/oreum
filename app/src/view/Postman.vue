@@ -37,12 +37,33 @@
       <code>
         last: {{ lastResponseTime.toLocaleTimeString() }} {{ lastResponseStatus }}<br>
       </code>
-      <code v-if="responseHeaders.length">
-        headers:<br>
-        <code v-for="header of responseHeaders" :key="header[0]">
-          {{ header[0] }}: {{ header[1] }}<br>
-        </code>
-      </code>
+      <table v-if="responseHeaders.length" style="border: 1px solid white; border-collapse: collapse; width: fit-content">
+        <caption style="border: 1px solid white">
+          <h3>
+            Response Headers
+          </h3>
+        </caption>
+        <thead>
+          <tr>
+            <th style="border: 1px solid white; border-collapse: collapse; padding: 2px 4px">
+              key
+            </th>
+            <th style="border: 1px solid white; border-collapse: collapse; padding: 2px 4px">
+              value
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="header of responseHeaders" :key="header[0]">
+            <td style="border: 1px solid white; border-collapse: collapse; padding: 2px 4px">
+              {{ header[0] }}
+            </td>
+            <td style="border: 1px solid white; border-collapse: collapse; padding: 2px 4px">
+              {{ header[1] }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
       <ui-button
         :disabled="sending"
         @click="send"
@@ -103,22 +124,41 @@ async function send () {
   previousRequestBody.value = requestBody.value
   try {
     const request = spdy(method.value, url.value, requestBody.value)
-    const response = await request.promiseResponse
+    const response = await request.response
+
+    const $responseHeaders: Array<[string, string]> = []
+    for (const entry of response.headers.entries()) $responseHeaders.push(entry)
+    responseHeaders.value = $responseHeaders
+
     lastResponseStatus.value = response.status
-    const headers: Array<[string, string]> = []
-    for (const header of response.headers.entries()) {
-      headers.push(header)
+
+    const contentType = response.headers.get('content-type')
+    const isStream = response.headers.get('oreum-stream') === 'true'
+
+    if (contentType) {
+      if (contentType.startsWith('application/json')) {
+        if (isStream) {
+          const iterator = request.streamJson()
+          for await (const response of iterator) {
+            console.log('stream:', response)
+            responseBody.value = response
+          }
+        } else {
+          const json = await request.json()
+          console.info('json:', json)
+          responseBody.value = JSON.stringify(json, undefined, 2)
+        }
+      } else if (contentType.includes('text/')) {
+        const text = await response.text()
+        console.info('text:', text)
+        responseBody.value = text
+      }
+    } else {
+      const blob = await response.blob()
+      console.log('blob')
+      responseBody.value = await blob.text()
     }
-    responseHeaders.value = headers
-    if (response.headers.get('content-type')?.includes('application/json')) {
-      const json = await request.json()
-      console.info('json:', json)
-      responseBody.value = JSON.stringify(json, undefined, 2)
-    } else if (response.headers.get('content-type')?.includes('text/')) {
-      const text = await response.text()
-      console.info('text:', text)
-      responseBody.value = text
-    }
+
     console.log('response:', response)
 
   } catch (error) {

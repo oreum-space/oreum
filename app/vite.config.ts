@@ -27,7 +27,7 @@ module.exports = defineConfig({
   build: {
     outDir: './../app-dist',
     cssCodeSplit: false,
-    emptyOutDir: true
+    emptyOutDir: true,
   },
   resolve: {
     alias: {

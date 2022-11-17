@@ -72,14 +72,16 @@ const profile = useProfile()
   }
 
   .app-logo {
-    transition: scale var(--transition-cubic-slow);
+    transition: scale var(--transition-default);
 
     &:hover {
+      transition: scale var(--transition-fast);
       scale: 1.0625;
     }
 
     &:active {
-      scale: 0.9375
+      transition: scale var(--transition-fast);
+      scale: 0.9375;
     }
   }
 }

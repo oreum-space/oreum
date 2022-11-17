@@ -4,7 +4,11 @@
     id="app-footer"
     class="app-footer"
   >
-    footer
+    <ul>
+      <li v-once>
+        Build timestamp: {{ buildTimestamp }}
+      </li>
+    </ul>
   </footer>
 </template>
 
@@ -12,7 +16,8 @@
   setup
   lang="ts"
 >
-
+const buildTimestamp =
+  new Date(document.head.querySelector<HTMLMetaElement>('[name="build-timestamp"]')!.content).toLocaleString()
 </script>
 
 <style lang="scss">
