@@ -4,8 +4,12 @@
     "key": "./.cert/key.pem",
     "port": 443,
     "options": {
-      "allowHTTP1": false,
-      "origins": []
+      "allowHTTP1": true,
+      "origins": [
+        "https://localhost",
+        "https://localhost:443",
+        "https://localhost:8443"
+      ]
     }
   },
   "modules": {

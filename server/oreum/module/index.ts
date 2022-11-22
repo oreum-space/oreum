@@ -5,9 +5,9 @@ interface OreumModuleProperties extends Record<string, any> {
 }
 
 export interface OreumModuleOptions {
-  create (oreum: Oreum): void
-  mount (oreum: Oreum): void
-  destroy (oreum: Oreum): void
+  create? (oreum: Oreum): Promise<void> | void
+  mount? (oreum: Oreum): Promise<void> | void
+  destroy? (oreum: Oreum): Promise<void> | void
 }
 
 export default class OreumModule {
@@ -21,6 +21,18 @@ export default class OreumModule {
     this.#options = options
     this.#properties = oreum.properties?.modules?.[name] as OreumModuleProperties
     this.#disabled = this.#properties?.disabled || false
+  }
+
+  create (): Promise<void> | void {
+    return this.#options.create?.(this.#oreum)
+  }
+
+  mount (): Promise<void> | void {
+    return this.#options.mount?.(this.#oreum)
+  }
+
+  destroy (): Promise<void> | void {
+    return this.#options.destroy?.(this.#oreum)
   }
 
   public get disabled () {

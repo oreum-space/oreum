@@ -30,23 +30,20 @@ class SpeedyResponse<ResponseBody = unknown> {
   constructor (request: SpeedyRequest) {
     this.request = request
 
-    console.log('signal 0')
     const controller = new AbortController()
     const signal = controller.signal
-    console.log('signal 1')
 
     signal.onabort = function (event) {
       console.log('fetch aborted event', event)
     }
 
-    console.log('signal 2')
-
     this.#promiseResponse = fetch(request.url, {
       method: request.method,
       body: WITHOUT_BODY_REQUESTS.includes(request.method) ? null : request.body,
-      signal
+      signal,
+      referrerPolicy: 'unsafe-url',
+      referrer: 'https://localhost'
     })
-    console.log('signal 3')
   }
 
   static #utf8decoder = new TextDecoder()
@@ -57,6 +54,7 @@ class SpeedyResponse<ResponseBody = unknown> {
 
   public async *streamJson () {
     const response = await this.response
+
     console.log('from *streamJson:', response.body)
     if (!response.body) {
       throw new Error()

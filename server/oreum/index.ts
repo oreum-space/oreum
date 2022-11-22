@@ -1,7 +1,7 @@
 import { readFileSync, statSync } from 'fs'
 import OreumCache from './cache'
 import OreumHttp from './http'
-import OreumModule from './module'
+import OreumModule, { OreumModuleOptions } from './module'
 import OreumPrompt from './prompt'
 import OreumSocket from './socket'
 
@@ -23,16 +23,20 @@ type DeepPartial<T> = T extends object ? {
 } : T
 
 export default class Oreum {
-  readonly #http = new OreumHttp(this)
-  readonly #cache = new OreumCache(this)
-  readonly #prompt = new OreumPrompt(this)
-  readonly #socket = new OreumSocket(this)
-  readonly #properties = Oreum.#readProperties()
+  readonly #properties: OreumProperties
   readonly #modules: Array<OreumModule> = []
+  readonly #prompt: OreumPrompt
+  readonly #socket: OreumSocket
+  readonly #cache: OreumCache
+  readonly #http: OreumHttp
 
   constructor () {
     process.title = `Oreum Server ${process.env.npm_package_version}(${process.version})`
     this.#properties = Oreum.#readProperties()
+    this.#prompt = new OreumPrompt(this)
+    this.#socket = new OreumSocket(this)
+    this.#cache = new OreumCache(this)
+    this.#http = new OreumHttp(this)
   }
 
   static #checkProperties (properties: DeepPartial<OreumProperties>): properties is OreumProperties {
@@ -72,13 +76,15 @@ export default class Oreum {
       }
     }
 
-    console.error('"properties.json" errors:\n *\t' + errors.join)
+    if (errors.length) {
+      console.error('"properties.json" errors:\n *\t' + errors.join('\n *\t'))
+    }
     return !errors.length
   }
 
   static #readProperties (): OreumProperties | never {
     try {
-      const rawProperties = readFileSync('./properties.json', { encoding: 'utf-8' })
+      const rawProperties = readFileSync('./server/properties.json', { encoding: 'utf-8' })
       const properties: DeepPartial<OreumProperties> = JSON.parse(rawProperties)
 
       if (this.#checkProperties(properties)) {
@@ -120,12 +126,27 @@ export default class Oreum {
     return this.#prompt
   }
 
-  public use (module: OreumModule): this {
-    this.#modules.push(module)
+  public module (name: string, options: OreumModuleOptions): OreumModule {
+    return new OreumModule(this, name, options)
+  }
+
+  public use (module: string): this
+  public use (name: string, options: OreumModuleOptions): this
+  public use (module: OreumModule | string, options?: OreumModuleOptions): this {
+    this.#modules.push(module instanceof OreumModule ? module : this.module(module, { ...options }))
     return this
   }
 
-  public done (): void {
+  async #done () {
+    for (const module of this.#modules) await module.create()
+    await this.#http.listen()
+    for (const module of this.#modules) await module.mount()
+  }
 
+  public done (): void {
+    this.#done().then(() => {
+      console.clear()
+      console.log('Done...')
+    })
   }
 }

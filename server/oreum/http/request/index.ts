@@ -1,38 +1,28 @@
-import type { Http2ServerRequest } from 'http2'
-
-class OreumHttpRequestBody implements Object {
-  #promise: Promise<unknown>
-
-  constructor (request: Http2ServerRequest) {
-    this.#promise = new Promise((resolve, reject) => {
-      request.on('data', (chunk: string | Buffer) => {
-
-      })
-    })
-  }
-
-  public string (): string {
-
-  }
-
-  public json (): unknown {
-
-  }
-}
+import type { Http2ServerRequest, IncomingHttpHeaders } from 'http2'
+import type { OreumHttpMethod } from '../handler'
+import OreumHttpRequestBody from './body'
 
 export default class OreumHttpRequest {
   readonly #request: Http2ServerRequest
   readonly #body: OreumHttpRequestBody
-  #query?: Record<string, unknown>
   #url?: URL
+  #query?: Record<string, unknown>
 
   constructor (request: Http2ServerRequest) {
     this.#request = request
     this.#body = new OreumHttpRequestBody(request)
   }
 
+  public header (key: keyof IncomingHttpHeaders) {
+    return this.#request.headers[key]
+  }
+
+  public get method (): OreumHttpMethod {
+    return this.#request.method as OreumHttpMethod
+  }
+
   public get url (): URL {
-    return this.#url || (this.#url = new URL(this.#request.url))
+    return this.#url || (this.#url = new URL(`${this.#request.scheme}://${this.#request.authority}${this.#request.url}`))
   }
 
   public get path () {

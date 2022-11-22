@@ -4,31 +4,34 @@ import type OreumHttpResponse from '../response'
 export type OreumHttpMethod = 'GET' | 'PUT' | 'POST' | 'HEAD' | 'PATCH' | 'DELETE' | 'OPTIONS'
 export type OreumHttpMethodGroup = 'GROUP'
 export type OreumHttpMethodWithGroup = OreumHttpMethod | OreumHttpMethodGroup
-export type OreumHttpHandlerPath = string | RegExp | { (path: string): boolean }
+export type OreumHttpHandlerPath = string | RegExp | { (path: string, request: OreumHttpRequest): boolean }
 export type OreumHttpHandlerFunction = (request: OreumHttpRequest, response: OreumHttpResponse) => Promise<unknown | void> | unknown | void
+
+export interface OreumHttpHandlerOptions {
+  priority?: number
+}
 
 export default class OreumHttpHandler {
   readonly #path?: OreumHttpHandlerPath
   readonly #handler?: OreumHttpHandlerFunction
-  readonly #method?: OreumHttpMethodWithGroup
+  public readonly priority: number
 
-  constructor (method: OreumHttpMethodWithGroup = 'GET', path?: OreumHttpHandlerPath, handler?: OreumHttpHandlerFunction) {
-    this.#handler = handler
+  constructor (path?: OreumHttpHandlerPath, handler?: OreumHttpHandlerFunction, options?: OreumHttpHandlerOptions) {
     this.#path = path
-    this.#method = method
+    this.#handler = handler
+    this.priority = options?.priority || 0
   }
 
-  handle (request: OreumHttpRequest, response: OreumHttpResponse): Promise<unknown | void> | unknown | void {
-    if (this.#method === )
-    if (this.checkPath()) {
-
+  public handle (request: OreumHttpRequest, response: OreumHttpResponse): Promise<unknown | void> | unknown | void {
+    if (this.#checkPath(request.path, request)) {
+      return this.#handler?.(request, response)
     }
   }
 
-  checkPath (path: string): boolean {
+  #checkPath (path: string, request: OreumHttpRequest): boolean {
     if (this.#path) {
       if (this.#path instanceof Function) {
-        return this.#path(path)
+        return this.#path(path, request)
       }
       if (this.#path instanceof RegExp) {
         return this.#path.test(path)

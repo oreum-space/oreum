@@ -30,6 +30,17 @@ const routes: Array<RouteRecordRaw> = [
     path: '/auth',
     component: () => import('@/view/Authorization.vue'),
     meta: { main: true, header: false, footer: false, transition: 'sign-page' }
+  },
+  {
+    name: 'UserInterface',
+    path: '/user-interface',
+    component: () => import('@/view/UserInterface.vue')
+  },
+  {
+    name: 'NotFound',
+    path: '/:pathMatch(.*)*',
+    component: () => import('@/view/NotFound.vue'),
+    meta: { main: true, header: false, footer: false, transition: 'sign-page' }
   }
 ]
 
