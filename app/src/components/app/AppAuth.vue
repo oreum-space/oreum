@@ -33,6 +33,7 @@ import UiButton from '@/components/ui/UiButton.vue'
   scoped
 >
 .app-auth {
+  padding-block: 8px;
   display: flex;
   gap: 12px;
 }

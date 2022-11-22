@@ -1,5 +1,6 @@
 <template>
-  <div
+  <component
+    :is="is"
     ref="accordion"
     class="ui-accordion"
     :data-accordion-state="state"
@@ -9,22 +10,24 @@
     }"
   >
     <slot />
-  </div>
+  </component>
 </template>
 
 <script
   setup
   lang="ts"
 >
-import { computed, onBeforeMount, onBeforeUnmount, Ref, ref } from 'vue'
+import { computed, onBeforeMount, onBeforeUnmount, Ref, ref, watch } from 'vue'
 
 type Props = {
+  is?: string,
   collapsed?: boolean,
   duration?: number | `${number}`
   easing?: CSSStyleDeclaration['transitionTimingFunction']
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  is: 'div',
   collapsed: false,
   duration: 250,
   easing: 'ease-in-out'
@@ -44,6 +47,8 @@ const computedDuration = computed(function () {
 
   return isFinite(value) && value >= 0 ? value : 250
 })
+
+watch(() => props.collapsed, _ => (_ ? startCollapsing : startExtending)())
 
 function clearAccordionTimeout (): boolean {
   if (timeoutId.value !== -1) {
@@ -117,35 +122,35 @@ onBeforeUnmount(function (): void {
 <style lang="scss">
 .ui-accordion {
   transition:
-    height calc(var(--new-ui-accordion-duration, 250ms) * 1ms) var(--new-ui-accordion-easing),
-    margin calc(var(--new-ui-accordion-duration, 250ms) * 1ms) var(--new-ui-accordion-easing);
+    height calc(var(--ui-accordion-duration, 250) * 1ms) var(--ui-accordion-easing, ease-in-out),
+    margin calc(var(--ui-accordion-duration, 250) * 1ms) var(--ui-accordion-easing, ease-in-out);
 
-  &[data-accordion-status=start-collapsing],
-  &[data-accordion-status=collapsing],
-  &[data-accordion-status=extending],
-  &[data-accordion-status=start-extending] {
+  &[data-accordion-state=start-collapsing],
+  &[data-accordion-state=collapsing],
+  &[data-accordion-state=extending],
+  &[data-accordion-state=start-extending] {
     overflow: hidden;
   }
 
-  &[data-accordion-status=collapsing] {
+  &[data-accordion-state=collapsing] {
     margin-block: 0;
   }
 
-  &[data-accordion-status=extending] {
+  &[data-accordion-state=extending] {
     transition:
-      height calc(var(--new-ui-accordion-duration, 250ms) * 1ms) var(--new-ui-accordion-easing),
-      margin calc(var(--new-ui-accordion-duration, 250ms) * 1ms) var(--new-ui-accordion-easing);
+      height calc(var(--ui-accordion-duration, 250ms) * 1ms) var(--ui-accordion-easing),
+      margin calc(var(--ui-accordion-duration, 250ms) * 1ms) var(--ui-accordion-easing);
   }
 
-  &[data-accordion-status=collapsed],
-  &[data-accordion-status=start-extending] {
+  &[data-accordion-state=collapsed],
+  &[data-accordion-state=start-extending] {
     margin-block: 0;
     transition:
-      height 0ms var(--new-ui-accordion-easing),
-      margin calc(var(--new-ui-accordion-duration, 250ms) * 1ms) var(--new-ui-accordion-easing);
+      height 0ms var(--ui-accordion-easing),
+      margin calc(var(--ui-accordion-duration, 250ms) * 1ms) var(--ui-accordion-easing);
   }
 
-  &[data-accordion-status=collapsed] {
+  &[data-accordion-state=collapsed] {
     display: none;
     height: 0;
   }

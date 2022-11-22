@@ -31,7 +31,7 @@
 
 .sign-page {
   &-enter-active {
-    transition: var(--transition-cubic-slow);
+    transition: var(--transition-linear-fast);
   }
 
   &-enter-from {

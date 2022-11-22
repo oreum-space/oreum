@@ -3,21 +3,27 @@
     <h1 id="buttons">
       Buttons
     </h1>
-    <table v-once>
+    <ui-table-accordion>
+      <template v-slot:caption>
+        &lt;ui-button&gt;&lt;/ui-button&gt;
+      </template>
       <thead>
         <tr>
-          <th />
-          <th v-for="seriousness of buttonSeriousness">
+          <ui-table-cell-diagonal
+            column-text="appearance"
+            row-text="seriousness"
+          />
+          <th v-once v-for="seriousness of buttonSeriousness">
             {{ seriousness }}
           </th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="appearance of buttonAppearance">
+        <tr v-once v-for="appearance of buttonAppearance">
           <td>
-            {{ appearance }}
+            {{ appearance || 'unset' }}
           </td>
-          <td v-for="seriousness of buttonSeriousness">
+          <td v-once v-for="seriousness of buttonSeriousness">
             <ui-button
               :appearance="appearance"
               :seriousness="seriousness"
@@ -28,7 +34,7 @@
           </td>
         </tr>
       </tbody>
-    </table>
+    </ui-table-accordion>
   </ui-card>
 </template>
 
@@ -36,6 +42,8 @@
   setup
   lang="ts"
 >
+import UiTableAccordion from '@/components/ui/table/UiTableAccordion.vue'
+import UiTableCellDiagonal from '@/components/ui/table/UiTableCellDiagonal.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiCard from '@/components/ui/UiCard.vue'
 

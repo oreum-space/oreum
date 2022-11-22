@@ -34,7 +34,22 @@ const routes: Array<RouteRecordRaw> = [
   {
     name: 'UserInterface',
     path: '/user-interface',
-    component: () => import('@/view/UserInterface.vue')
+    component: () => import('@/view/user-interface/UserInterface.vue'),
+    meta: {
+      main: true
+    },
+    children: [
+      {
+        name: 'UserInterfaceDefault',
+        path: '',
+        component: () => import('@/view/user-interface/UserInterfaceDefault.vue')
+      },
+      {
+        name: 'UserInterfaceButtons',
+        path: '/user-interface/buttons',
+        component: () => import('@/view/user-interface/UserInterfaceButtons.vue')
+      }
+    ]
   },
   {
     name: 'NotFound',

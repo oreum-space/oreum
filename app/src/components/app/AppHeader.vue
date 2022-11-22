@@ -26,8 +26,13 @@ import AppAuth from '@/components/app/AppAuth.vue'
 import AppLogo from '@/components/app/AppLogo.vue'
 import AppProfile from '@/components/app/AppProfile.vue'
 import useProfile from '@/store/profile'
+import { onMounted } from 'vue'
 
 const profile = useProfile()
+const emits = defineEmits<{
+  (e: 'mounted'): void
+}>()
+onMounted(() => emits('mounted'))
 </script>
 
 <style
@@ -36,14 +41,16 @@ const profile = useProfile()
 >
 .app-header {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   position: fixed;
   width: 100%;
   height: var(--app-header-height);
   --background-color: var(--surface-card);
   background-color: var(--background-color);
-  box-shadow: 0 3px 5px rgb(0 0 0 / 4%), 0 0 2px rgb(0 0 0 / 10%), 0 1px 4px rgb(0 0 0 / 16%);
-  padding-block: 8px;
+  box-shadow:
+    0 3px 5px rgb(0 0 0 / 4%),
+    0 0 2px rgb(0 0 0 / 10%),
+    0 1px 4px rgb(0 0 0 / 16%);
   top: 0;
   z-index: 1;
 

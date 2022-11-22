@@ -43,8 +43,5 @@ progress {
 
 .app-main {
   min-height: var(--fvh);
-
-  &:not(&_full) {
-    padding-block: 80px 24px;
-  }
+  padding-block: calc(24px + var(--header-height)) 24px;
 }

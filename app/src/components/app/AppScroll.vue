@@ -1,7 +1,7 @@
 <template>
   <transition name="fade">
     <div
-      v-show="style.thumbHeight <= 0.93"
+      v-show="show"
       ref="scrollbar"
       role="scrollbar"
       class="app-scrollbar"
@@ -15,7 +15,7 @@
   setup
   lang="ts"
 >
-import { onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 
 class ScrollBarStyle {
   '--scrollbar-bottom' = '0'
@@ -49,6 +49,11 @@ class ScrollBarStyle {
 const scrollbar = ref<HTMLElement>()
 const style = ref(new ScrollBarStyle)
 const html = document.documentElement
+const show = computed(() => {
+  return style.value.thumbHeight <= 0.90 && document.querySelectorAll('.app-main').length === 1
+})
+
+watch(() => style.value.thumbHeight, () => console.log(style.value.thumbHeight))
 
 onMounted(function () {
   const footer = document.getElementById('app-footer')!
@@ -127,8 +132,8 @@ function pointerup (event: PointerEvent): void {
   position: fixed;
   width: 10px;
   right: 0;
-  top: var(--app-header-height);
-  height: calc(100% - var(--app-header-height) - var(--scrollbar-bottom));
+  top: var(--header-height);
+  height: calc(100% - var(--header-height) - var(--scrollbar-bottom));
   -webkit-user-drag: none;
   user-select: none;
   --scrollbar-width: 7px;

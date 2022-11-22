@@ -16,8 +16,14 @@
   setup
   lang="ts"
 >
+import { onMounted } from 'vue'
+
 const buildTimestamp =
   new Date(document.head.querySelector<HTMLMetaElement>('[name="build-timestamp"]')!.content).toLocaleString()
+const emits = defineEmits<{
+  (e: 'mounted'): void
+}>()
+onMounted(() => emits('mounted'))
 </script>
 
 <style lang="scss">
