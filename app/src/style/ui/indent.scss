@@ -1,20 +1,29 @@
-$indents: ('1': 4, '2': 8, '3': 12, '4': 16, '5': 20, '6': 24, '7': 28, '8': 32);
+$indents: ('1': 4px, '2': 8px, '3': 12px, '4': 16px, '5': 20px, '6': 24px, '7': 28px, '8': 32px, 'a': var(--app-padding));
 $sides: ('t': 'top', 'b': 'bottom', 'l': 'left', 'r': 'right', 'h': 'inline', 'v': 'block');
+$g-sides: ('r': 'row', 'c': 'column');
 
 @each $indent, $value in $indents {
   .p#{$indent} {
-    padding: #{$value}px;
+    padding: #{$value};
   }
   .m#{$indent} {
-    margin: #{$value}px;
+    margin: #{$value};
+  }
+  .g#{$indent} {
+    gap: #{$value};
   }
 
   @each $side, $property in $sides {
     .p#{$side}#{$indent} {
-      padding-#{$property}: #{$value}px;
+      padding-#{$property}: #{$value};
     }
     .m#{$side}#{$indent} {
-      margin-#{$property}: #{$value}px;
+      margin-#{$property}: #{$value};
+    }
+  }
+  @each $side, $property in $g-sides {
+    .g#{$side}#{$indent} {
+      #{$property}-gap: #{$value};
     }
   }
 }

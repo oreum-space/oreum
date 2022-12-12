@@ -7,7 +7,7 @@ export type SpeedyMethod =
   'DELETE' |
   'OPTIONS'
 
-class SpeedyRequest<ResponseBody = unknown> {
+class SpeedyRequest {
   public method: SpeedyMethod
   public url: string
   public body: BodyInit | null
@@ -24,7 +24,7 @@ class SpeedyRequest<ResponseBody = unknown> {
 const WITHOUT_BODY_REQUESTS = ['GET', 'HEAD'] as Readonly<Array<SpeedyMethod>>
 
 class SpeedyResponse<ResponseBody = unknown> {
-  public request: SpeedyRequest<ResponseBody>
+  public request: SpeedyRequest
   readonly #promiseResponse: Promise<Response>
 
   constructor (request: SpeedyRequest) {
@@ -41,8 +41,7 @@ class SpeedyResponse<ResponseBody = unknown> {
       method: request.method,
       body: WITHOUT_BODY_REQUESTS.includes(request.method) ? null : request.body,
       signal,
-      referrerPolicy: 'unsafe-url',
-      referrer: 'https://localhost'
+      mode: 'cors'
     })
   }
 
@@ -79,22 +78,33 @@ class SpeedyResponse<ResponseBody = unknown> {
     return data
   }
 
-  public async json (): Promise<ResponseBody>  {
+  public async json (): Promise<ResponseBody> {
     const response = await this.response
     return (await response.json() as ResponseBody)
   }
 }
 
-interface SpeedyOptions {
-}
+type SpeedyOptions = object
 
 const DEFAULT_METHOD: SpeedyMethod = 'GET'
-const DEFAULT_TYPE = 'application/octet-stream'
+// const DEFAULT_TYPE = 'application/octet-stream'
 
-function spdy <ResponseBody = unknown>(url: string): SpeedyResponse<ResponseBody>
-function spdy <ResponseBody = unknown>(method: SpeedyMethod, url: string, body?: BodyInit, options?: SpeedyOptions): SpeedyResponse<ResponseBody>
-function spdy <ResponseBody = unknown>(method_or_url: SpeedyMethod | string, url?: string, body?: BodyInit, options?: SpeedyOptions): SpeedyResponse<ResponseBody> {
-  return new SpeedyResponse<ResponseBody>(new SpeedyRequest(url ? method_or_url as SpeedyMethod : DEFAULT_METHOD, url || method_or_url, body, options))
+function spdy<ResponseBody = unknown>
+(url: string): SpeedyResponse<ResponseBody>
+
+function spdy<ResponseBody = unknown>
+(method: SpeedyMethod, url: string, body?: BodyInit, options?: SpeedyOptions): SpeedyResponse<ResponseBody>
+
+function spdy<ResponseBody = unknown> (
+  method_or_url: SpeedyMethod | string, url?: string, body?: BodyInit,
+  options?: SpeedyOptions
+): SpeedyResponse<ResponseBody> {
+  return new SpeedyResponse<ResponseBody>(
+    new SpeedyRequest(
+      url
+        ? method_or_url as SpeedyMethod
+        : DEFAULT_METHOD, url || method_or_url, body, options)
+  )
 }
 
 export default spdy

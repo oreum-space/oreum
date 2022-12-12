@@ -10,6 +10,7 @@ html {
   --background-color: var(--surface-ground);
   background-color: var(--background-color);
   color: var(--text-color);
+  overscroll-behavior-y: none;
 }
 
 html[class^='prevent-scrolling'], html[class*=' prevent-scrolling'] {
@@ -31,17 +32,11 @@ html, body {
   }
 }
 
-progress {
-  width: 200px;
-  margin-inline: calc(50% - 100px);
-  margin-top: calc(33%);
-}
-
 .app-main, .app-header {
-  padding-inline: max(24px, 50vw - var(--app-default-max-width-half));
+  padding-inline: max(var(--app-padding), 50vw - var(--app-default-max-width-half));
 }
 
 .app-main {
   min-height: var(--fvh);
-  padding-block: calc(24px + var(--header-height)) 24px;
+  padding-block: calc(var(--app-padding) + var(--header-height)) var(--app-padding);
 }

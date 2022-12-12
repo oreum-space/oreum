@@ -22,6 +22,13 @@
   border-radius: 8px;
   width: 100%;
   max-width: 100%;
+  --thead-background: var(--surface-c);
+  --tbody-background: var(--surface-a);
+  --tcolp-background: var(--surface-b);
+
+  &__col_primary {
+    background-color: var(--tcolp-background);
+  }
 
   &__toggle.ui-button {
     position: sticky;
@@ -34,8 +41,9 @@
     overflow: hidden;
     text-overflow: ellipsis;
     display: block;
-    min-height: 30px;
-    max-height: 30px;
+    min-height: 31px;
+    max-height: 31px;
+    border-bottom: 1px solid var(--surface-border-a-static);
 
     img {
       position: absolute;
@@ -46,8 +54,6 @@
   }
 
   caption {
-    top: 0;
-    width: 100%;
     padding: 4px;
     background-color: var(--background-color);
   }
@@ -67,11 +73,22 @@
   td, th {
     padding: 4px 8px;
     text-align: center;
-    background-color: var(--background-color);
   }
 
   td:not(td:last-child), th:not(th:last-child) {
     border-right: 1px solid var(--surface-border-a-static);
+  }
+
+  thead {
+    background-color: var(--thead-background);
+  }
+
+  tbody {
+    background-color: var(--tbody-background);
+  }
+  tfoot {
+    background-color: var(--tcolp-background);
+    border-top: 1px solid var(--surface-border-a-static);
   }
 }
 
@@ -89,11 +106,4 @@
 .ui-table__wrapper_accordion[data-accordion-state=extended] img,
 .ui-table__wrapper_accordion[data-accordion-state=extending] img {
   rotate: 180deg;
-}
-
-.ui-table_accordion {
-
-  caption {
-    display: none !important;
-  }
 }

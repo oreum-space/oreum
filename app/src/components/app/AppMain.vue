@@ -9,8 +9,8 @@
       </main>
       <component
         v-else
-        class="app-main"
         :is="Component"
+        class="app-main"
       />
     </transition>
   </router-view>

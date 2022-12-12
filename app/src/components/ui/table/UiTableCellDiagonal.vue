@@ -1,8 +1,8 @@
 <template>
   <th
+    ref="cell"
     class="ui-table-cell-diagonal"
     :style="{ '--ui-table-cell-diagonal-rotate': `${radians}rad` }"
-    ref="cell"
   >
     <div class="ui-table-cell-diagonal__text">
       <div>
@@ -19,7 +19,7 @@
   setup
   lang="ts"
 >
-import { onMounted, Ref, ref } from 'vue'
+import { onBeforeUnmount, onMounted, Ref, ref } from 'vue'
 
 type Props = {
   rowText: string,
@@ -39,8 +39,12 @@ function rotate () {
 }
 
 onMounted(() => {
-  resizeObserver.observe(cell.value);
+  resizeObserver.observe(cell.value)
   rotate()
+})
+
+onBeforeUnmount(() => {
+  resizeObserver.disconnect()
 })
 
 </script>
@@ -48,10 +52,10 @@ onMounted(() => {
 <style lang="scss">
 .ui-table-cell-diagonal {
   background-image: linear-gradient(var(--ui-table-cell-diagonal-rotate, 0),
-    transparent calc(50% - 0.75px),
+    var(--tcolp-background) calc(50% - 1px),
     var(--surface-border-a-static) calc(50% - 0.5px),
     var(--surface-border-a-static) calc(50% + 0.5px),
-    transparent calc(50% + 0.75px));
+    transparent calc(50% + 1px));
 
   &__text {
     display: flex;

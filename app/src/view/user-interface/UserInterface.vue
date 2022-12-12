@@ -11,6 +11,7 @@
       </router-link>
       <router-link
         v-for="route of children"
+        :key="route.path"
         :to="route.path"
       >
         {{ route.name }}
@@ -20,7 +21,6 @@
       <router-view />
     </section>
   </main>
-
 </template>
 
 <script
@@ -31,8 +31,7 @@ import UiCard from '@/components/ui/UiCard.vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
-const children =
-  router.options.routes.find(_ => _.name === 'UserInterface')!.children!.filter(_ => _.path)
+const children = router.options.routes.find(_ => _.name === 'UserInterface')?.children?.filter(_ => _.path)
 </script>
 
 <style
@@ -52,6 +51,32 @@ const children =
   &__content {
     padding-left: 280px;
     width: 100%;
+  }
+}
+
+@media (max-width: 1024px) {
+  .user-interface {
+    display: flex;
+    flex-flow: column;
+
+    &__navigation {
+      display: flex;
+      flex-flow: row;
+      align-items: center;
+      position: static;
+      height: 64px;
+      white-space: nowrap;
+      overflow: scroll;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
+    }
+
+    &__content {
+      padding: var(--app-padding) 0 0;
+      width: 100%;
+    }
   }
 }
 </style>

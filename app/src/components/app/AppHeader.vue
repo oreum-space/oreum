@@ -12,7 +12,10 @@
     >
       <app-logo />
     </router-link>
-    <div class="app-header__space"/>
+    <div class="app-header-tabs">
+
+    </div>
+    <div class="app-header__space" />
     <app-profile v-if="profile.id" />
     <app-auth v-else />
   </header>
@@ -35,10 +38,7 @@ const emits = defineEmits<{
 onMounted(() => emits('mounted'))
 </script>
 
-<style
-  lang="scss"
-  scoped
->
+<style lang="scss">
 .app-header {
   display: flex;
   align-items: flex-end;
@@ -52,7 +52,7 @@ onMounted(() => emits('mounted'))
     0 0 2px rgb(0 0 0 / 10%),
     0 1px 4px rgb(0 0 0 / 16%);
   top: 0;
-  z-index: 1;
+  z-index: 10;
 
   @media screen and (display-mode: standalone) {
     top: -16px;
@@ -80,6 +80,7 @@ onMounted(() => emits('mounted'))
 
   .app-logo {
     transition: scale var(--transition-default);
+    margin: -8px;
 
     &:hover {
       transition: scale var(--transition-fast);
@@ -89,6 +90,20 @@ onMounted(() => emits('mounted'))
     &:active {
       transition: scale var(--transition-fast);
       scale: 0.9375;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .app-logo {
+      width: 144px;
+      height: 36px;
+      margin: 0;
+
+      use {
+        width: 144px;
+        height: 36px;
+        scale: 75%;
+      }
     }
   }
 }

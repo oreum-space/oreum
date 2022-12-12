@@ -12,7 +12,10 @@ interface OreumProperties {
     cert: string
     options?: {
       allowHTTP1?: false,
-      origins?: []
+      appAuthorities?: Array<string>,
+      apiAuthorities?: Array<string>,
+      origin?: string,
+      origins?: Array<string>
     }
   }
   modules?: Record<string, unknown>
@@ -145,7 +148,6 @@ export default class Oreum {
 
   public done (): void {
     this.#done().then(() => {
-      console.clear()
       console.log('Done...')
     })
   }

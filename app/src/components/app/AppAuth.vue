@@ -7,15 +7,23 @@
       <ui-button
         seriousness="secondary"
         appearance="outlined"
+        size="small"
       >
-        Login
+        <ui-icon icon="user" />
+        <span>
+          Login
+        </span>
       </ui-button>
     </router-link>
     <router-link to="/new-account">
       <ui-button
         seriousness="success"
+        size="small"
       >
-        New Account
+        <ui-icon icon="new-user" />
+        <span>
+          New Account
+        </span>
       </ui-button>
     </router-link>
   </nav>
@@ -26,6 +34,7 @@
   lang="ts"
 >
 import UiButton from '@/components/ui/UiButton.vue'
+import UiIcon from '@/components/ui/UiIcon.vue'
 </script>
 
 <style
@@ -33,14 +42,28 @@ import UiButton from '@/components/ui/UiButton.vue'
   scoped
 >
 .app-auth {
-  padding-block: 8px;
   display: flex;
+  padding-block: 10px;
   gap: 12px;
 }
 
 @media (max-width: 768px) {
   .app-auth {
-    display: none;
+    position: absolute;
+    right: var(--app-padding);
+    span {
+      display: none;
+    }
+  }
+}
+
+@media (max-width: 374px) {
+  .app-auth {
+    position: absolute;
+
+    & > *:first-child {
+      display: none;
+    }
   }
 }
 </style>

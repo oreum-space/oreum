@@ -16,9 +16,6 @@
     <table
       class="ui-table ui-table_accordion"
     >
-      <caption v-if="$slots.caption">
-        <slot name="caption" />
-      </caption>
       <slot />
     </table>
   </ui-accordion>

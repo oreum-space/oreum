@@ -8,6 +8,9 @@
       <li v-once>
         Build timestamp: {{ buildTimestamp }}
       </li>
+      <li>
+        {{ windowHeight }} x {{ windowWidth }}
+      </li>
     </ul>
   </footer>
 </template>
@@ -16,7 +19,7 @@
   setup
   lang="ts"
 >
-import { onMounted } from 'vue'
+import { inject, onMounted, Ref } from 'vue'
 
 const buildTimestamp =
   new Date(document.head.querySelector<HTMLMetaElement>('[name="build-timestamp"]')!.content).toLocaleString()
@@ -24,6 +27,9 @@ const emits = defineEmits<{
   (e: 'mounted'): void
 }>()
 onMounted(() => emits('mounted'))
+const windowHeight = inject<Ref<number>>('windowHeight')!
+const windowWidth = inject<Ref<number>>('windowWidth')!
+
 </script>
 
 <style lang="scss">

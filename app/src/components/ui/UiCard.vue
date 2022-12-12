@@ -1,8 +1,8 @@
 <template>
   <component
-    class="ui-card"
     :is="_tag_"
     :class="classes"
+    class="ui-card"
   >
     <slot />
   </component>

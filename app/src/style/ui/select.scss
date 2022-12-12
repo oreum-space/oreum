@@ -1,0 +1,143 @@
+.ui-select {
+  position: relative;
+  width: fit-content;
+
+  &[aria-disabled=true] {
+    opacity: 0.4;
+    cursor: not-allowed;
+
+    .ui-select__button {
+      pointer-events: none;
+    }
+  }
+
+  &__label {
+    position: absolute;
+    float: left;
+    left: 12px;
+    top: 9px;
+    pointer-events: none;
+    transition-duration: 0.2s;
+    color: var(--text-color-secondary);
+    user-select: none;
+    border-radius: 4px;
+  }
+
+  &__value {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    overflow: clip;
+
+    &:hover {
+      overflow-x: scroll;
+      text-overflow: unset;
+    }
+
+    &-enter-active,
+    &-leave-active {
+      transition: opacity 0.25s ease;
+    }
+
+    &-enter-from,
+    &-leave-to {
+      opacity: 0;
+    }
+  }
+
+  &__value::-webkit-scrollbar,
+  &__list::-webkit-scrollbar,
+  &__option::-webkit-scrollbar {
+    display: none;
+  }
+
+  &__value ~ &__label {
+    font-size: 12px;
+    line-height: 14px;
+    top: -0.6rem;
+    background-color: var(--background-color);
+    padding: 2px 4px;
+    margin-left: -4px;
+    margin-top: 0;
+  }
+
+  &__button {
+    display: flex;
+    min-height: 40px;
+    cursor: pointer;
+  }
+
+  &__list[data-popper-hidden=false][data-popper-placement=bottom] + &__button {
+    border-radius: 4px 4px 0 0;
+  }
+
+  &__list[data-popper-hidden=false][data-popper-placement=top] + &__button {
+    border-radius: 0 0 4px 4px;
+  }
+
+  &[data-select-open=true] &__label,
+  &__button:hover &__label {
+    color: var(--border-color);
+  }
+
+  &__arrow {
+    color: var(--border-color);
+    user-select: none;
+    pointer-events: none;
+    -webkit-user-drag: none;
+    margin: -2px -2px -2px auto;
+    transition: 0.2s;
+    flex-shrink: 0;
+  }
+
+  &__list {
+    width: 100%;
+    background-color: var(--surface-overlay);
+    box-shadow: var(--surface-overlay-shadow);
+    z-index: 1;
+    overflow-x: hidden;
+    overflow-y: auto;
+    height: auto;
+    max-height: calc(max(80px, min(calc(var(--fvh) / 2 - 120px), 368px)));
+    border-radius: 4px 4px 0 0;
+    padding-block: 4px;
+
+    &[data-popper-placement=bottom] {
+      border-radius: 0 0 4px 4px;
+    }
+  }
+
+  &__option {
+    cursor: pointer;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    overflow: clip;
+
+    &:hover {
+      background-color: var(--surface-c);
+      overflow-x: scroll;
+      text-overflow: unset;
+    }
+
+    &_selected {
+      background-color: var(--primary-color);
+      color: var(--primary-color-text);
+
+      &:hover {
+        background-color: var(--primary-color-hover);
+      }
+    }
+  }
+
+  &__option,
+  &__no-option {
+    padding: 8px 12px;
+  }
+
+  &__no-option {
+    text-align: center;
+    font-style: italic;
+    color: var(--text-color-secondary);
+  }
+}

@@ -7,8 +7,8 @@
       <div class="ui-input-inline">
         <ui-button
           v-for="m of methods"
-          size="small"
           :key="m"
+          size="small"
           :seriousness="m === method ? 'primary' : 'passive'"
           @click="method = m"
         >
@@ -18,26 +18,29 @@
         </ui-button>
       </div>
       <ui-input-text
+        v-model="url"
         class="flex-grow"
         width="480px"
         label="Url"
-        v-model="url"
       />
       <ui-input-textarea
-        label="Request Body"
         v-model="requestBody"
+        label="Request Body"
         code
       />
       <ui-input-textarea
-        label="Response body"
         v-model="responseBody"
+        label="Response body"
         code
         disabled
       />
       <code>
         last: {{ lastResponseTime.toLocaleTimeString() }} {{ lastResponseStatus }}<br>
       </code>
-      <table v-if="responseHeaders.length" style="border: 1px solid white; border-collapse: collapse; width: fit-content">
+      <table
+        v-if="responseHeaders.length"
+        style="border: 1px solid white; border-collapse: collapse; width: fit-content"
+      >
         <caption style="border: 1px solid white">
           <h3>
             Response Headers
@@ -54,7 +57,10 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="header of responseHeaders" :key="header[0]">
+          <tr
+            v-for="header of responseHeaders"
+            :key="header[0]"
+          >
             <td style="border: 1px solid white; border-collapse: collapse; padding: 2px 4px">
               {{ header[0] }}
             </td>
@@ -83,7 +89,7 @@ import UiInputTextarea from '@/components/ui/input/UiInputTextarea.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import spdy, { SpeedyMethod } from '@/library/spdy'
 import { computed, ref, WritableComputedRef } from 'vue'
-import UiCard from "@/components/ui/UiCard.vue";
+import UiCard from '@/components/ui/UiCard.vue'
 
 const methods = [
   'GET',
@@ -95,7 +101,7 @@ const methods = [
   'OPTIONS'
 ] as Readonly<Array<SpeedyMethod>>
 
-function localRef(key: string, value: string) {
+function localRef (key: string, value: string) {
   const l = localStorage.getItem(key)
   const _ = ref<string>(l || value)
   return computed<string>({
@@ -127,7 +133,9 @@ async function send () {
     const response = await request.response
 
     const $responseHeaders: Array<[string, string]> = []
-    for (const entry of response.headers.entries()) $responseHeaders.push(entry)
+    for (const entry of response.headers.entries()) {
+      $responseHeaders.push(entry)
+    }
     responseHeaders.value = $responseHeaders
 
     lastResponseStatus.value = response.status

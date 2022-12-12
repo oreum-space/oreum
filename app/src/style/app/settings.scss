@@ -6,4 +6,9 @@
   --app-footer-min-height: 64px;
   --vh: var(--jsvh, 1vh);
   --fvh: calc(var(--vh) * 100);
+  --app-padding: 24px;
+
+  @media (max-width: 768px) {
+    --app-padding: 16px;
+  }
 }

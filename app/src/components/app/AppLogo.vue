@@ -19,12 +19,3 @@
 >
 import oreum from '@/assets/logo/oreum.svg'
 </script>
-
-<style
-  lang="scss"
-  scoped
->
-.app-logo {
-  margin: -8px;
-}
-</style>

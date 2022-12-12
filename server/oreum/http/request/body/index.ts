@@ -7,6 +7,7 @@ export default class OreumHttpRequestBody {
   #string?: string
   #json?: unknown
   #jsonOnce?: boolean
+  #authority?: boolean
 
   static Error = class OreumHttpRequestBodyError extends Error {
     code: number
@@ -23,6 +24,8 @@ export default class OreumHttpRequestBody {
 
   constructor (request: Http2ServerRequest) {
     this.#contentType = request.headers['content-type']
+    this.#authority = false
+
     this.#promise = new Promise<string | Buffer>((resolve) => {
       request.on('data', (chunk: string | Buffer) => {
         resolve(chunk)

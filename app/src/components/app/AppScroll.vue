@@ -15,7 +15,7 @@
   setup
   lang="ts"
 >
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, Ref, ref } from 'vue'
 
 class ScrollBarStyle {
   '--scrollbar-bottom' = '0'
@@ -46,17 +46,15 @@ class ScrollBarStyle {
   }
 }
 
-const scrollbar = ref<HTMLElement>()
+const scrollbar = ref<HTMLElement>() as Ref<HTMLElement>
 const style = ref(new ScrollBarStyle)
 const html = document.documentElement
 const show = computed(() => {
   return style.value.thumbHeight <= 0.90 && document.querySelectorAll('.app-main').length === 1
 })
 
-watch(() => style.value.thumbHeight, () => console.log(style.value.thumbHeight))
-
 onMounted(function () {
-  const footer = document.getElementById('app-footer')!
+  const footer = document.getElementById('app-footer') as HTMLElement
   const resizeObserver = new ResizeObserver(scrollHandler)
 
   function calculateHeight () {
@@ -93,36 +91,36 @@ let scrollTopDown = 0
 function pointermove (event: PointerEvent): void {
   const scrollBound = html.scrollHeight - window.innerHeight
   const percent = scrollBound / (window.innerHeight - 56 -
-    parseFloat(window.getComputedStyle(scrollbar.value!, ':after').height))
+    parseFloat(window.getComputedStyle(scrollbar.value, ':after').height))
   html.scrollTop = Math.max(Math.min(scrollTopDown - (down - event.y) * percent, scrollBound), 0)
 }
 
 function isThumb (event: PointerEvent): boolean {
-  const { height, top } = window.getComputedStyle(scrollbar.value!, '::after')
+  const { height, top } = window.getComputedStyle(scrollbar.value, '::after')
   return event.offsetY >= parseFloat(top) && event.offsetY <= parseFloat(top) + parseFloat(height)
 }
 
 function pointerdown (event: PointerEvent): void {
   if (!isThumb(event)) {
-    const height = parseFloat(window.getComputedStyle(scrollbar.value!, '::after').height)
+    const height = parseFloat(window.getComputedStyle(scrollbar.value, '::after').height)
     html.scrollTop = Math.max(
       Math.min(
-        ((event.offsetY + height / 2) / scrollbar.value!.clientHeight) * html.scrollHeight - window.innerHeight,
+        ((event.offsetY + height / 2) / scrollbar.value.clientHeight) * html.scrollHeight - window.innerHeight,
         html.scrollHeight - window.innerHeight
       ), 0)
   }
   down = event.y
   scrollTopDown = html.scrollTop
-  scrollbar.value!.classList.add('app-scrollbar_active')
+  scrollbar.value.classList.add('app-scrollbar_active')
   document.documentElement.classList.add('prevent-scrolling_scrollbar')
   addEventListener('pointermove', pointermove)
   addEventListener('pointerup', pointerup)
   pointermove(event)
 }
 
-function pointerup (event: PointerEvent): void {
+function pointerup (): void {
   removeEventListener('pointermove', pointermove)
-  scrollbar.value!.classList.remove('app-scrollbar_active')
+  scrollbar.value.classList.remove('app-scrollbar_active')
   document.documentElement?.classList.remove('prevent-scrolling_scrollbar')
 }
 </script>

@@ -5,16 +5,54 @@
     "port": 443,
     "options": {
       "allowHTTP1": true,
+      "origin": "https://oreum.space",
       "origins": [
-        "https://localhost",
-        "https://localhost:443",
-        "https://localhost:8443"
+        "https://local-api.oreum.space",
+        "https://local.oreum.space",
+        "https://api.oreum.space",
+        "https://oreum.space",
+        "https://local-discord.oreum.space",
+        "https://discord.oreum.space"
       ]
     }
   },
   "modules": {
     "mongoose": {
       "url": "mongodb://127.0.0.1/oreum"
+    },
+    "app": {
+      "authority": [
+        "local.oreum.space",
+        "oreum.space"
+      ]
+    },
+    "api": {
+      "authority": [
+        "local-api.oreum.space",
+        "api.oreum.space"
+      ]
+    },
+    "discord": {
+      "enabled": true,
+      "invite": "https://discord.gg/BxSJjnJFRG",
+      "authority": [
+        "local-discord.oreum.space",
+        "discord.oreum.space"
+      ],
+      "appid": "<data>",
+      "guild": "<data>",
+      "token": "<data>",
+      "key": "<data>"
+    },
+    "jwt": {
+      "access": "<data>",
+      "refresh": "<data>"
+    },
+    "smtp": {
+      "host": "<data>",
+      "port": "<data>",
+      "user": "<data>",
+      "pass": "<data>"
     }
   }
 }

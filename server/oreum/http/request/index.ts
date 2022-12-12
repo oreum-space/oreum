@@ -5,12 +5,24 @@ import OreumHttpRequestBody from './body'
 export default class OreumHttpRequest {
   readonly #request: Http2ServerRequest
   readonly #body: OreumHttpRequestBody
+  readonly #authority: ReturnType<typeof this.header>
+  readonly #origin: ReturnType<typeof this.header>
   #url?: URL
   #query?: Record<string, unknown>
 
   constructor (request: Http2ServerRequest) {
     this.#request = request
     this.#body = new OreumHttpRequestBody(request)
+    this.#authority = this.header(':authority')
+    this.#origin = this.header('origin')
+  }
+
+  get authority () {
+    return this.#authority
+  }
+
+  get origin () {
+    return this.#origin
   }
 
   public header (key: keyof IncomingHttpHeaders) {

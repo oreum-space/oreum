@@ -26,7 +26,7 @@
     user-select: none;
   }
 
-  &:enabled:hover {
+  &:not(&:disabled):hover {
     --border-color: var(--text-color-secondary);
 
     & ~ .ui-input-icon {
@@ -34,11 +34,11 @@
     }
   }
 
-  &:enabled:hover:not(:focus) ~ &-label {
+  &:not(&:disabled):hover:not(:focus) ~ &-label {
     color: var(--text-color-secondary);
   }
 
-  &:enabled:focus {
+  &:not(&:disabled):focus {
     --border-color: var(--primary-color);
     box-shadow: inset 0 0 0 1px var(--border-color), inset 0 0 0 1px var(--border-color), inset 0 0 0 1px var(--border-color), inset 0 0 0 1px var(--border-color);
     outline: 0;
@@ -53,12 +53,8 @@
     position: relative;
     display: inline-block;
     min-height: 40px;
-    width: fit-content;
+    width: var(--width, 240px);
     max-width: 100%;
-
-    @media (max-width: 768px) {
-      width: unset;
-    }
   }
 
   &-inline {

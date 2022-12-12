@@ -16,7 +16,7 @@
     <link
       rel="stylesheet"
       href="./src/style/index.scss"
-      onload="document.head.removeChild(document.getElementById('pre-style')); this.attributes.onload = null"
+      onload="document.head.removeChild(document.getElementById('pre-style')); this.removeAttribute('onload')"
     >
     <!-- Scripts -->
     <script type="module" src="./src/main.ts"></script>

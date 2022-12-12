@@ -1,22 +1,20 @@
+import dev from '@/router/routes/dev'
+import other from '@/router/routes/other'
 import type { RouteRecordRaw } from 'vue-router'
 
 const routes: Array<RouteRecordRaw> = [
+  ...dev,
+  ...other,
   {
     name: 'Home',
     path: '/',
-    component: () => import('@/view/Home.vue'),
-    meta: { main: true }
-  },
-  {
-    name: 'Test',
-    path: '/test',
-    component: () => import('@/view/Test.vue'),
+    component: () => import('@/view/HomePage.vue'),
     meta: { main: true }
   },
   {
     name: 'Postman',
     path: '/postman',
-    component: () => import('@/view/Postman.vue'),
+    component: () => import('@/view/PostmanPage.vue'),
     meta: { main: true }
   },
   {
@@ -28,7 +26,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     name: 'Authorization',
     path: '/auth',
-    component: () => import('@/view/Authorization.vue'),
+    component: () => import('@/view/AuthorizationPage.vue'),
     meta: { main: true, header: false, footer: false, transition: 'sign-page' }
   },
   {
@@ -48,6 +46,16 @@ const routes: Array<RouteRecordRaw> = [
         name: 'UserInterfaceButtons',
         path: '/user-interface/buttons',
         component: () => import('@/view/user-interface/UserInterfaceButtons.vue')
+      },
+      {
+        name: 'UserInterfaceSwitch',
+        path: '/user-interface/switches',
+        component: () => import('@/view/user-interface/UserInterfaceSwitches.vue')
+      },
+      {
+        name: 'UserInterfaceSelect',
+        path: '/user-interface/select',
+        component: () => import('@/view/user-interface/UserInterfaceSelect.vue')
       }
     ]
   },

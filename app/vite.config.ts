@@ -2,10 +2,16 @@ import { readFileSync } from 'fs'
 import path from 'path'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import eslint from 'vite-plugin-eslint'
+
+const host = 'local.oreum.space'
 
 module.exports = defineConfig({
   root: './app/',
-  plugins: [vue()],
+  plugins: [vue(), void eslint()],
+  define: {
+    __VUE_OPTIONS_API__: false
+  },
   server: {
     port: 8443,
     https: {
@@ -13,7 +19,7 @@ module.exports = defineConfig({
       cert: readFileSync('./.cert/cert.pem'),
       passphrase: 'localhost'
     },
-    host: true
+    host: host
   },
   preview: {
     port: 8443,
@@ -22,7 +28,7 @@ module.exports = defineConfig({
       cert: readFileSync('./.cert/cert.pem'),
       passphrase: 'localhost'
     },
-    host: true
+    host: host
   },
   build: {
     outDir: './../app-dist',

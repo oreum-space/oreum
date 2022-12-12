@@ -1,28 +1,60 @@
 import Oreum from './oreum'
-import { OreumCacheLevel } from './oreum/cache'
-
-function sleep (ms: number): Promise<void> {
-  return new Promise<void>(_ => setTimeout(_, ms))
-}
+import apiModule from './src/api'
+import appModule from './src/app'
+import discordModule from './src/discord'
+import mongooseModule from './src/mongoose'
 
 new Oreum()
-  .use('test', {
+  .use('mongoose', mongooseModule)
+  .use('discord', discordModule)
+  .use('app', appModule)
+  .use('api', apiModule)
+  .done()
+/*   .use('test', {
     create (oreum) {
       const { http } = oreum
 
-      http.get(() => true, async (request, response) => {
+      const appGroup = new OreumHttpGroup('/', {
+        authority: oreum.properties.http.options?.appAuthorities,
+        origin: true
+      })
+
+      appGroup.get('/ping', async (request, response) => {
+          return response.json({
+            from: 'application',
+            message: 'Hello world!'
+          })
+        }
+      )
+
+      const apiGroup = new OreumHttpGroup('/', {
+        authority: oreum.properties.http.options?.apiAuthorities,
+        origin: true
+      })
+
+      apiGroup.get('/ping', async (request, response) => {
+        return response.json({
+          from: 'api',
+          message: 'Hello world!'
+        })
+      })
+
+      http.group(appGroup)
+      http.group(apiGroup)
+
+      appGroup.get(() => true, async (request, response) => {
         return await response.static('/', request.path, './app-dist/', OreumCacheLevel.CACHE_RAM)
       }, {
         priority: -128
       })
 
-      http.get(() => true, (request, response) => {
+      appGroup.get(() => true, (request, response) => {
         return response.file('./app-dist/index.html', OreumCacheLevel.CACHE_RAM)
       }, {
         priority: -256
       })
 
-      http.get('/json', (request, response) => {
+      apiGroup.get('/', (request, response) => {
         return response.json({
           'json': true,
           date: new Date(),
@@ -31,7 +63,7 @@ new Oreum()
         })
       })
 
-      http.get('/oreum-request', (request, response) => {
+      apiGroup.get('/oreum-request', (request, response) => {
         return response.oreumJson({
           steps: ['step-1', 'step-2', 'step-3'],
           actions: ['', '', ''],
@@ -59,5 +91,4 @@ new Oreum()
         })
       })
     }
-  })
-  .done()
+  }) */

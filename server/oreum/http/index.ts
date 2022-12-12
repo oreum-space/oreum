@@ -24,19 +24,32 @@ export class OreumHttpRaw {
     GROUP: []
   }
 
-  async handleGroup (request: OreumHttpRequest, response: OreumHttpResponse): Promise<boolean> {
-    const group = this.handlers.GROUP.find(group => request.path.startsWith(group.path))
+  async #handleGroup (request: OreumHttpRequest, response: OreumHttpResponse): Promise<boolean> {
+    const groups = this.handlers.GROUP.filter(group => request.path.startsWith(group.path))
+    const authGroups: typeof groups = []
+    const legitGroups: typeof groups = []
 
-    if (group) {
-      await group.handle(request, response)
+    for (const group of groups) {
+      (group.authority ? authGroups : legitGroups).push(group)
+    }
+
+    const authGroup = authGroups.find(group => group.checkAuthority(request))
+
+    if (authGroup && await authGroup.handle(request, response)) {
       return true
+    }
+
+    for (const group of legitGroups) {
+      if (await group.handle(request, response)) {
+        return true
+      }
     }
 
     return false
   }
 
-  async handle (request: OreumHttpRequest, response: OreumHttpResponse): Promise<boolean> {
-    if (await this.handleGroup(request, response)) {
+  protected async handle (request: OreumHttpRequest, response: OreumHttpResponse): Promise<boolean> {
+    if (await this.#handleGroup(request, response)) {
       return true
     }
 
@@ -142,7 +155,7 @@ export default class OreumHttp extends OreumHttpRaw {
 
   listen () {
     this.sort()
-    setTimeout(() => console.log(this.handlers), 1000)
+    // setTimeout(() => console.log(this.handlers), 1000)
     return new Promise<void>(_ => this.#server.listen(this.#oreum.properties.http.port, _))
   }
 }

@@ -21,8 +21,8 @@
       {{ label }}
     </label>
     <span
-      ref="countersElement"
       v-if="counters"
+      ref="countersElement"
       class="ui-input-textarea__counters"
     >
       <span
@@ -60,25 +60,25 @@ const emits = defineEmits<Emits>()
 const textarea = ref<HTMLTextAreaElement>() as Ref<HTMLTextAreaElement>
 const countersElement = props.code ? ref<HTMLElement>() : undefined
 
-const
-  value = computed({
-    get (): string {
-      return props.modelValue || ''
-    },
-    set (value: string) {
-      emits('update:modelValue', value)
-    }
-  }),
-  _disabled = computed(() => typeof props.modelValue !== 'string' || !!props.disabled),
-  counters = computed(() => props.code ? 1 + (value.value.match(/\n/g)||[]).length : 0)
-
-function onscroll () {
-  if (countersElement?.value) {
-    countersElement.value.scrollTop = textarea.value.scrollTop
+const value = computed({
+  get (): string {
+    return props.modelValue || ''
+  },
+  set (value: string) {
+    emits('update:modelValue', value)
   }
-}
+})
+const _disabled = computed(() => typeof props.modelValue !== 'string' || !!props.disabled)
+const counters = computed(() => props.code ? 1 + (value.value.match(/\n/g)||[]).length : 0)
 
-if (props.code) {
+const onscroll = countersElement
+  ? function () {
+    if (countersElement.value) {
+      countersElement.value.scrollTop = textarea.value.scrollTop
+    }
+  } : undefined
+
+if (onscroll) {
   onMounted(() => {
     textarea.value.addEventListener('scroll', onscroll)
   })

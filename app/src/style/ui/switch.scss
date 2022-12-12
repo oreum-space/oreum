@@ -1,0 +1,145 @@
+.ui-switch {
+  margin-block: 3px;
+  border-radius: 16px;
+  border: 1px solid var(--surface-border-a);
+  height: 32px;
+  width: 56px;
+  position: relative;
+
+  &::before {
+    position: absolute;
+    width: 50px;
+    height: 26px;
+    border-radius: 13px;
+    left: 2px;
+    top: 2px;
+    content: ' ';
+    background-color: var(--surface-b);
+  }
+
+  &::after {
+    position: absolute;
+    border-radius: 11px;
+    width: 22px;
+    height: 22px;
+    left: 4px;
+    top: 4px;
+    content: ' ';
+    background-color: var(--primary-color);
+    opacity: 0.5;
+    filter: grayscale(1);
+    transition: var(--transition-cubic);
+  }
+
+  &[aria-checked=true]::after {
+    border-radius: 13px;
+    width: 26px;
+    height: 26px;
+    left: 26px;
+    top: 2px;
+    opacity: 1;
+    filter: grayscale(0);
+  }
+
+  &[aria-disabled=false] {
+    cursor: pointer;
+  }
+  &:hover[aria-disabled=false]::after {
+    background-color: var(--primary-color-hover);
+  }
+  &:focus[aria-disabled=false]::after {
+    background-color: var(--primary-color-focus);
+  }
+  &:active[aria-disabled=false]::after {
+    background-color: var(--primary-color-active);
+  }
+  &_secondary {
+    &::after {
+      background-color: var(--secondary-color);
+    }
+    &:hover[aria-disabled=false]::after {
+      background-color: var(--secondary-color-hover);
+    }
+    &:focus[aria-disabled=false]::after {
+      background-color: var(--secondary-color-focus);
+    }
+    &:active[aria-disabled=false]::after {
+      background-color: var(--secondary-color-active);
+    }
+  }
+  &_success {
+    &::after {
+      background-color: var(--success-color);
+    }
+
+    &:hover[aria-disabled=false]::after {
+      background-color: var(--success-color-hover);
+    }
+    &:focus[aria-disabled=false]::after {
+      background-color: var(--success-color-focus);
+    }
+    &:active[aria-disabled=false]::after {
+      background-color: var(--success-color-active);
+    }
+  }
+  &_info {
+    &::after {
+      background-color: var(--info-color);
+    }
+
+    &:hover[aria-disabled=false]::after {
+      background-color: var(--info-color-hover);
+    }
+    &:focus[aria-disabled=false]::after {
+      background-color: var(--info-color-focus);
+    }
+    &:active[aria-disabled=false]::after {
+      background-color: var(--info-color-active);
+    }
+  }
+  &_warning {
+    &::after {
+      background-color: var(--warning-color);
+    }
+
+    &:hover[aria-disabled=false]::after {
+      background-color: var(--warning-color-hover);
+    }
+    &:focus[aria-disabled=false]::after {
+      background-color: var(--warning-color-focus);
+    }
+    &:active[aria-disabled=false]::after {
+      background-color: var(--warning-color-active);
+    }
+  }
+  &_danger {
+    &::after {
+      background-color: var(--danger-color);
+    }
+
+    &:hover[aria-disabled=false]::after {
+      background-color: var(--danger-color-hover);
+    }
+    &:focus[aria-disabled=false]::after {
+      background-color: var(--danger-color-focus);
+    }
+    &:active[aria-disabled=false]::after {
+      background-color: var(--danger-color-active);
+    }
+  }
+  &_passive {
+    &::after {
+      background-color: var(--passive-color);
+    }
+
+    &:hover[aria-disabled=false]::after {
+      background-color: var(--passive-color-hover);
+    }
+    &:focus[aria-disabled=false]::after {
+      background-color: var(--passive-color-focus);
+    }
+    &:active[aria-disabled=false]::after {
+      background-color: var(--passive-color-active);
+    }
+  }
+}

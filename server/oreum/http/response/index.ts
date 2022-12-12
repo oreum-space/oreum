@@ -26,20 +26,21 @@ export default class OreumHttpResponse {
     this.#oreum = oreum
     this.#response = response
     this.#request = request
+    this.unsetOrigin()
   }
 
   #close (status = 200, headers?: OutgoingHttpHeaders) {
     if (!this.#responded) {
       this.#responded = true
       this.#closed = true
-      this.#response.stream.respond({ ...headers, ':status': status }, { endStream: true })
+      this.#response.stream.respond({ ...this.#response.getHeaders(), ...headers, ':status': status }, { endStream: true })
     }
   }
 
   #respond (status = 200, headers?: OutgoingHttpHeaders) {
     if (!this.#responded) {
       this.#responded = true
-      this.#response.stream.respond({ ...headers, ':status': status }, { endStream: false })
+      this.#response.stream.respond({ ...this.#response.getHeaders(), ...headers, ':status': status }, { endStream: false })
     }
   }
 
@@ -126,6 +127,13 @@ export default class OreumHttpResponse {
     }
   }
 
+  redirect (to: string): this {
+    this.#respond(301, {
+      'Location': to
+    })
+    return this
+  }
+
   file (path: string, level: OreumCacheLevel = OreumCacheLevel.CACHE_RAM) {
     void (level ? this.#fileFromCache(path, level) : this.#fileFromFileSystem(path))
     return this
@@ -200,8 +208,28 @@ export default class OreumHttpResponse {
     return this
   }
 
+  setOrigin (origin: string) { // TODO add schema
+    console.log('trying set origin:', origin)
+    if (this.#oreum.properties.http.options?.origins?.includes(origin)) {
+      this.#response.setHeader('access-control-allow-origin', origin)
+    } else if (this.#oreum.properties.http.options?.origin) {
+      this.#response.setHeader('access-control-allow-origin', this.#oreum.properties.http.options.origin)
+    }
+  }
+
+  unsetOrigin () {
+    if (this.#response.getHeader('access-control-allow-origin') !== '*') {
+      this.#response.setHeader('access-control-allow-origin', '*')
+    }
+  }
+
   badRequest (): this {
     this.#close(400)
+    return this
+  }
+
+  forbidden (): this {
+    this.#close(403)
     return this
   }
 

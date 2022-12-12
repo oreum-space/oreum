@@ -8,7 +8,6 @@
   setup
   lang="ts"
 >
-
 import UiCard from '@/components/ui/UiCard.vue'
 </script>
 
