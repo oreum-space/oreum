@@ -21,6 +21,8 @@ function getProperties (oreum: Oreum) {
   properties = oreum.properties.modules['discord'] as OreumDiscordProperties
 }
 
+const invitePaths = ['/invite', '/redirect', '/join']
+
 const discordModule: OreumModuleOptions = {
   create (oreum) {
     try {
@@ -42,7 +44,7 @@ const discordModule: OreumModuleOptions = {
           })
         })
 
-        discord.get('/redirect', (request, response) => {
+        discord.get((path) => invitePaths.includes(path), (request, response) => {
           response.redirect(properties.invite)
         })
       }
