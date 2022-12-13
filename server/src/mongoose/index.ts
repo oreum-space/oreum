@@ -3,6 +3,7 @@ import sleep from '../../library/sleep'
 import Oreum from '../../oreum'
 
 type OreumMongooseProperties = {
+  enabled?: boolean,
   url: string
 }
 
@@ -38,12 +39,14 @@ export default {
       throw new Error('"modules.mongoose" required!')
     }
 
-    if (!properties.url) {
-      console.error('"properties.json" errors:\n *\t"modules.mongoose.url" required!')
-      throw new Error('"modules.mongoose.url" required!')
-    }
+    if (properties.enabled) {
+      if (!properties.url) {
+        console.error('"properties.json" errors:\n *\t"modules.mongoose.url" required!')
+        throw new Error('"modules.mongoose.url" required!')
+      }
 
-    await _connect()
+      await _connect()
+    }
   }
 }
 
