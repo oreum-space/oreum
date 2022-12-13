@@ -4,6 +4,9 @@
   "version": "1.0.0",
   "license": "ISC",
   "scripts": {
+    "nvm": "nvm use 19.2.0",
+    "build": "yarn api:build && yarn app:build",
+    "start": "node ./server-dist/index.js",
     "api:watch-start": "nodemon --watch ./server-dist ./server-dist/index.js",
     "api:watch-build": "npx tsc -p ./server --watch",
     "api:start": "node ./server-dist/index.js",
