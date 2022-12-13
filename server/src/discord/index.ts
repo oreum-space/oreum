@@ -40,7 +40,8 @@ const discordModule: OreumModuleOptions = {
           response.json({
             json: true,
             invite: properties.invite,
-            authority: properties.authority
+            links: invitePaths.map(_ => `https://discord.oreum.space${_}`),
+            authority: properties.authority,
           })
         })
 
