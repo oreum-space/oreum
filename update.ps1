@@ -1,0 +1,1 @@
+oreum "sh /root/oreum.space.update.sh"

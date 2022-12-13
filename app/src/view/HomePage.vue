@@ -1,7 +1,7 @@
 <template>
   <main class="home">
     <h1>
-      Oreum Space
+      Oreum Space Updated
     </h1>
   </main>
 </template>
