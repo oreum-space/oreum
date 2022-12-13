@@ -443,7 +443,7 @@ function setColorModel (v: Ref['value']) {
     box-shadow: var(--surface-overlay-shadow);
     border-radius: 12px;
     gap: 8px;
-    z-index: 1;
+    z-index: 4;
     user-select: none;
     -webkit-user-drag: none;
 

@@ -40,10 +40,7 @@
         label="Value"
       />
       <div class="d-flex ga">
-        <ui-input-text
-          v-model="color"
-          label="Color"
-        />
+        <ui-input-color v-model="color" />
         <ui-button
           appearance="outlined"
           seriousness="success"
@@ -67,6 +64,7 @@
   setup
   lang="ts"
 >
+import UiInputColor from '@/components/ui/input/color/UiInputColor.vue'
 import UiInputText from '@/components/ui/input/UiInputText.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiCard from '@/components/ui/UiCard.vue'
@@ -105,7 +103,7 @@ const items = ref<Array<Item>>([
 ])
 const name = ref<string>('')
 const value = ref<string>('1')
-const color = ref<string>('gray')
+const color = ref<string>('#888888')
 
 const totalValue = computed(() => items.value.reduce((a, _) => a + _.value, 0))
 const angle = ref<number>(0)
