@@ -210,16 +210,20 @@ export default class OreumHttpResponse {
 
   setOrigin (origin: string) { // TODO add schema
     console.log('trying set origin:', origin)
-    if (this.#oreum.properties.http.options?.origins?.includes(origin)) {
-      this.#response.setHeader('access-control-allow-origin', origin)
-    } else if (this.#oreum.properties.http.options?.origin) {
-      this.#response.setHeader('access-control-allow-origin', this.#oreum.properties.http.options.origin)
+    if (!this.#responded) {
+      if (this.#oreum.properties.http.options?.origins?.includes(origin)) {
+        this.#response.setHeader('access-control-allow-origin', origin)
+      } else if (this.#oreum.properties.http.options?.origin) {
+        this.#response.setHeader('access-control-allow-origin', this.#oreum.properties.http.options.origin)
+      }
     }
   }
 
   unsetOrigin () {
-    if (this.#response.getHeader('access-control-allow-origin') !== '*') {
-      this.#response.setHeader('access-control-allow-origin', '*')
+    if (!this.#responded) {
+      if (this.#response.getHeader('access-control-allow-origin') !== '*') {
+        this.#response.setHeader('access-control-allow-origin', '*')
+      }
     }
   }
 
