@@ -79,12 +79,12 @@ export default class OreumHttpResponse {
     }
   }
 
-  #sendFile (file: OreumCacheFile): this {
+  #sendFile (file: OreumCacheFile, status = 200): this {
     const ifModifiedSince = this.#request.header('if-modified-since')
     const modified = typeof ifModifiedSince !== 'string' || +new Date(ifModifiedSince) < +file.modifiedDate - 1000
 
     if (modified) {
-      this.#respond(200, {
+      this.#respond(status, {
         [http2.constants.HTTP2_HEADER_CACHE_CONTROL]: 'no-cache',
         [http2.constants.HTTP2_HEADER_CONTENT_LENGTH]: file.buffer.length,
         [http2.constants.HTTP2_HEADER_CONTENT_ENCODING]: 'gzip',
@@ -94,16 +94,16 @@ export default class OreumHttpResponse {
 
       this.#end(file.buffer)
     } else {
-      this.#respond(304)
+      this.#respond(status >= 400 ? status : 304)
       this.#end()
     }
 
     return this
   }
 
-  async #fileFromCache (path: string, level: Exclude<OreumCacheLevel, 0> = OreumCacheLevel.CACHE_RAM, skip?: boolean): Promise<this | void> {
+  async #fileFromCache (path: string, level: Exclude<OreumCacheLevel, 0> = OreumCacheLevel.CACHE_RAM, skip?: boolean, status = 200): Promise<this | void> {
     try {
-      return this.#sendFile(await this.#oreum.cache.file(path, level))
+      return this.#sendFile(await this.#oreum.cache.file(path, level), status)
     } catch (error) {
       if (skip) {
         return
@@ -113,9 +113,9 @@ export default class OreumHttpResponse {
     }
   }
 
-  async #fileFromFileSystem (path: string, skip?: boolean): Promise<this | void> {
+  async #fileFromFileSystem (path: string, skip?: boolean, status = 200): Promise<this | void> {
     try {
-      return this.#sendFile(await new OreumCacheFile(path).get())
+      return this.#sendFile(await new OreumCacheFile(path).get(), status)
     } catch (error) {
       if (skip) {
         return
@@ -134,8 +134,8 @@ export default class OreumHttpResponse {
     return this
   }
 
-  file (path: string, level: OreumCacheLevel = OreumCacheLevel.CACHE_RAM) {
-    void (level ? this.#fileFromCache(path, level) : this.#fileFromFileSystem(path))
+  file (path: string, level: OreumCacheLevel = OreumCacheLevel.CACHE_RAM, status = 200) {
+    void (level ? this.#fileFromCache(path, level, false, status) : this.#fileFromFileSystem(path, false, status))
     return this
   }
 
@@ -238,7 +238,14 @@ export default class OreumHttpResponse {
   }
 
   notFound (): this {
-    this.#close(404)
+    const accept = this.#request.header(http2.constants.HTTP2_HEADER_ACCEPT)
+
+    if (typeof accept === 'string' && accept.includes('text/html')) {
+      this.file('./app-dist/pages/404.html', OreumCacheLevel.CACHE_RAM, 404)
+    } else {
+      this.#close(404)
+    }
+
     return this
   }
 

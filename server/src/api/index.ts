@@ -12,6 +12,12 @@ const apiModule: OreumModuleOptions = {
 
     oreum.http.group(api)
 
+    api.get('/favicon.ico', (request, response) => {
+      return response.file('./app-dist/favicons/api.svg')
+    }, {
+      priority: -127
+    })
+
     api.get('/ping', (request, response) => {
       return response.json({
         from: 'api',

@@ -2,10 +2,12 @@ import Oreum from './oreum'
 import apiModule from './src/api'
 import appModule from './src/app'
 import discordModule from './src/discord'
+import faviconModule from './src/favicon'
 import mongooseModule from './src/mongoose'
 
 new Oreum()
   .use('mongoose', mongooseModule)
+  .use('favicons', faviconModule)
   .use('discord', discordModule)
   .use('app', appModule)
   .use('api', apiModule)
