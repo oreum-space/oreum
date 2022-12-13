@@ -8,6 +8,7 @@ createApp(App)
   .use(pinia)
   .mount('body')
 
+/*
 if ('serviceWorker' in navigator && location.hostname !== 'localhost') {
   void (async function () {
     try {
@@ -17,3 +18,4 @@ if ('serviceWorker' in navigator && location.hostname !== 'localhost') {
     }
   })()
 }
+*/

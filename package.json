@@ -14,7 +14,8 @@
     "app:dev": "vite -c ./app/vite.config.ts",
     "app:watch-build": "vue-tsc --noEmit -p ./app && vite build -c ./app/vite.config.ts --watch",
     "app:preview": "vite preview -c ./app/vite.config.ts",
-    "app:build": "vue-tsc --noEmit -p ./app && vite build -c ./app/vite.config.ts"
+    "app:build": "vue-tsc --noEmit -p ./app && vite build -c ./app/vite.config.ts",
+    "server:update": "./update.ps1"
   },
   "dependencies": {
     "@popperjs/core": "^2.11.6",
