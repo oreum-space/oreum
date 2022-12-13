@@ -1,4 +1,5 @@
 import type Oreum from '../../oreum'
+import OreumHttpGroup from '../../oreum/http/group'
 import { OreumModuleOptions } from '../../oreum/module'
 
 type OreumDiscordProperties = {
@@ -26,11 +27,23 @@ const discordModule: OreumModuleOptions = {
       getProperties(oreum)
 
       if (properties.enabled) {
-        oreum.http.get('/', (request, response) => {
-          response.redirect(properties.invite)
-        }, {
-          origin: false,
+        const discord = new OreumHttpGroup('/', {
+          origin: true,
           authority: properties.authority
+        })
+
+        oreum.http.group(discord)
+
+        discord.get('/', (request, response) => {
+          response.json({
+            json: true,
+            invite: properties.invite,
+            authority: properties.authority
+          })
+        })
+
+        discord.get('/redirect', (request, response) => {
+          response.redirect(properties.invite)
         })
       }
     } catch (error) {
