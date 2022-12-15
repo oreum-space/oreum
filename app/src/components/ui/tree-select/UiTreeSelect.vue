@@ -94,7 +94,7 @@ const emits = defineEmits<Emits>()
 const select = ref<typeof UiSelect>()
 
 function updateModelValue (value: TModelValue): void {
-  select.value.close()
+  select.value?.close()
   emits('update:modelValue', value)
 }
 </script>
