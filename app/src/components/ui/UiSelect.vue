@@ -7,42 +7,45 @@
     @focusout="focusout"
     @keydown="preventScrolling"
   >
-    <div
-      v-show="open"
-      ref="list"
-      role="list"
-      class="ui-select__list"
-    >
-      <slot
-        name="list"
-      />
-      <template v-if="options.length">
-        <div
-          v-for="option of options"
-          :key="option"
-          role="listitem"
-          class="ui-select__option"
-          :class="{ 'ui-select__option_selected': option === modelValue }"
-          @click="updateModelValue(option); close()"
-        >
-          <slot
-            name="option"
-            :option="option"
+    <transition name="list">
+      <div
+        v-show="open"
+        ref="list"
+        role="list"
+        class="ui-select__list"
+        @pointerdown.prevent
+      >
+        <slot
+          name="list"
+        />
+        <template v-if="options.length && !$slots.list">
+          <div
+            v-for="option of options"
+            :key="option"
+            role="listitem"
+            class="ui-select__option"
+            :class="{ 'ui-select__option_selected': option === modelValue }"
+            @click="updateModelValue(option); close()"
           >
-            {{ option }}
+            <slot
+              name="option"
+              :option="option"
+            >
+              {{ option }}
+            </slot>
+          </div>
+        </template>
+        <div
+          v-if="options.length === 0"
+          class="ui-select__no-option"
+          @click="close()"
+        >
+          <slot name="no-options">
+            No options
           </slot>
         </div>
-      </template>
-      <div
-        v-else
-        class="ui-select__no-option"
-        @click="close()"
-      >
-        <slot name="no-options">
-          No options
-        </slot>
       </div>
-    </div>
+    </transition>
     <div
       ref="button"
       role="button"
@@ -92,17 +95,17 @@ import UiIcon from '@/components/ui/UiIcon.vue'
 import { createPopper, flip, Instance } from '@popperjs/core'
 import { onBeforeUnmount, onMounted, Ref, ref, watch } from 'vue'
 
-type ModelValue = Ref['value']
+type TModelValue = Ref['value']
 
 type Props = {
   label?: string,
-  modelValue?: ModelValue,
-  options?: Array<ModelValue>,
+  modelValue?: TModelValue,
+  options?: Array<TModelValue>,
   disabled?: boolean
 }
 
 type Emits = {
-  (e: 'update:modelValue', value: ModelValue): void
+  (e: 'update:modelValue', value: TModelValue): void
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -124,18 +127,25 @@ let popper: Instance
 
 onMounted(() => {
   popper = createPopper(button.value, list.value, {
-    modifiers: [flip, {
-      name: 'preventOverflow',
-      options: {
-        altAxis: true,
-        padding: {
-          top: 64,
-          left: 8,
-          right: 8,
-          bottom: 8
+    modifiers: [
+      flip,
+      {
+        name: 'preventOverflow',
+        options: {
+          altAxis: true,
+          padding: {
+            top: 64,
+            left: 8,
+            right: 8,
+            bottom: 8
+          }
         }
+      },
+      {
+        name: 'eventListeners',
+        enabled: open.value
       }
-    }]
+    ]
   })
 })
 
@@ -173,10 +183,14 @@ function pointerdownHandler (event: PointerEvent) {
   }
 }
 
+const resizeObserver = new ResizeObserver(() => popper.forceUpdate())
+
 watch(open, (value) => {
   if (value) {
+    requestAnimationFrame(() => resizeObserver.observe(list.value))
     addEventListener('pointerdown', pointerdownHandler)
   } else {
+    resizeObserver.unobserve(list.value)
     removeEventListener('pointerdown', pointerdownHandler)
   }
   update()
@@ -186,16 +200,12 @@ function buttonClick () {
   open.value = !open.value
 }
 
-function focusout (event: FocusEvent) {
-  const path = event.composedPath()
-
-  function nextEventLoop () {
-    if (document.activeElement && !path.includes(document.activeElement)) {
+function focusout () {
+  setTimeout(function () {
+    if (document.activeElement && !select.value.contains(document.activeElement)) {
       close()
     }
-  }
-
-  setTimeout(nextEventLoop)
+  })
 }
 
 function close () {
@@ -203,10 +213,13 @@ function close () {
 }
 
 
-function updateModelValue (value: ModelValue): void {
+function updateModelValue (value: TModelValue): void {
   emits('update:modelValue', value)
   const index = props.options.findIndex(option => value === option)
-  list.value.scrollTo({ top: (index - 1 ) * (36) })
+  const item = list.value.children.item(index)
+  if (item) {
+    item.scrollIntoView({ block: 'center' })
+  }
 }
 
 function updateModelValueByIndex (value: number): void {
@@ -270,4 +283,9 @@ function preventScrolling (event: KeyboardEvent) {
     event.preventDefault()
   }
 }
+
+defineExpose({
+  updateModelValue,
+  close
+})
 </script>

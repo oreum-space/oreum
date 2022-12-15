@@ -22,15 +22,17 @@ import { computed, onBeforeMount, onBeforeUnmount, Ref, ref, watch } from 'vue'
 type Props = {
   is?: string,
   collapsed?: boolean,
-  duration?: number | `${number}`
-  easing?: CSSStyleDeclaration['transitionTimingFunction']
+  duration?: number | `${number}`,
+  easing?: CSSStyleDeclaration['transitionTimingFunction'],
+  maxHeight?: number
 }
 
 const props = withDefaults(defineProps<Props>(), {
   is: 'div',
   collapsed: false,
   duration: 250,
-  easing: 'ease-in-out'
+  easing: 'ease-in-out',
+  maxHeight: undefined
 })
 
 type UiAccordionState = 'unknown' |

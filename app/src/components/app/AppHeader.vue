@@ -12,8 +12,25 @@
     >
       <app-logo />
     </router-link>
-    <div class="app-header-tabs">
-
+    <div class="app-header__tabs">
+      <router-link to="/user-interface">
+        <ui-button
+          size="large"
+          seriousness="warning"
+          appearance="text"
+        >
+          UI
+        </ui-button>
+      </router-link>
+      <router-link to="/other/lucky-wheel">
+        <ui-button
+          size="large"
+          seriousness="success"
+          appearance="text"
+        >
+          Wheel
+        </ui-button>
+      </router-link>
     </div>
     <div class="app-header__space" />
     <app-profile v-if="profile.id" />
@@ -28,6 +45,7 @@
 import AppAuth from '@/components/app/AppAuth.vue'
 import AppLogo from '@/components/app/AppLogo.vue'
 import AppProfile from '@/components/app/AppProfile.vue'
+import UiButton from '@/components/ui/UiButton.vue'
 import useProfile from '@/store/profile'
 import { onMounted } from 'vue'
 
@@ -60,12 +78,19 @@ onMounted(() => emits('mounted'))
   }
 
   @media (max-width: 768px) {
-
     &__space {
       display: none;
     }
 
     justify-content: center;
+  }
+
+  &__tabs {
+    display: flex;
+    align-items: center;
+    height: var(--app-header-height);
+    padding-inline: 12px;
+    gap: 8px;
   }
 
   &__space {

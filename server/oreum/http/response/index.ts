@@ -33,14 +33,14 @@ export default class OreumHttpResponse {
     if (!this.#responded) {
       this.#responded = true
       this.#closed = true
-      this.#response.stream.respond({ ...this.#response.getHeaders(), ...headers, ':status': status }, { endStream: true })
+      this.#response.stream?.respond({ ...this.#response.getHeaders(), ...headers, ':status': status }, { endStream: true })
     }
   }
 
   #respond (status = 200, headers?: OutgoingHttpHeaders) {
     if (!this.#responded) {
       this.#responded = true
-      this.#response.stream.respond({ ...this.#response.getHeaders(), ...headers, ':status': status }, { endStream: false })
+      this.#response.stream?.respond({ ...this.#response.getHeaders(), ...headers, ':status': status }, { endStream: false })
     }
   }
 

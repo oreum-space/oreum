@@ -1,6 +1,7 @@
 .ui-select {
   position: relative;
-  width: fit-content;
+  max-width: 100%;
+  width: var(--width, 240px);
 
   &[aria-disabled=true] {
     opacity: 0.4;
@@ -86,8 +87,12 @@
     pointer-events: none;
     -webkit-user-drag: none;
     margin: -2px -2px -2px auto;
-    transition: 0.2s;
+    transition: var(--transition-default);
     flex-shrink: 0;
+  }
+
+  &[data-select-open=true] &__arrow {
+    scale: 1 -1 1;
   }
 
   &__list {
@@ -101,9 +106,10 @@
     max-height: calc(max(80px, min(calc(var(--fvh) / 2 - 120px), 368px)));
     border-radius: 4px 4px 0 0;
     padding-block: 4px;
+    clip-path: polygon(-10px calc(100% + 10px), calc(100% + 10px) calc(100% + 10px), calc(100% + 10px) -10px, -10px -10px);
 
     &[data-popper-placement=bottom] {
-      border-radius: 0 0 4px 4px;
+      clip-path: polygon(-10px -10px, calc(100% + 10px) -10px, calc(100% + 10px) calc(100% + 10px), -10px calc(100% + 10px));
     }
   }
 
@@ -139,5 +145,20 @@
     text-align: center;
     font-style: italic;
     color: var(--text-color-secondary);
+  }
+}
+
+.list-enter-active,
+.list-leave-active {
+  transition: clip-path var(--transition-fast), opacity var(--transition-linear-fast);
+}
+
+.list-enter-from,
+.list-leave-to {
+  opacity: 0;
+  clip-path: polygon(-10px calc(100% + 10px), calc(100% + 10px) calc(100% + 10px), calc(100% + 10px) calc(100% + 10px), -10px calc(100% + 10px));
+
+  &[data-popper-placement=bottom] {
+    clip-path: polygon(-10px -10px, calc(100% + 10px) -10px, calc(100% + 10px) -10px, -10px -10px);
   }
 }
