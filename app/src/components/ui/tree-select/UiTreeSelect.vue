@@ -91,7 +91,7 @@ withDefaults(defineProps<Props>(), {
 
 const emits = defineEmits<Emits>()
 
-const select = ref<UiSelect>()
+const select = ref<typeof UiSelect>()
 
 function updateModelValue (value: TModelValue): void {
   select.value.close()
