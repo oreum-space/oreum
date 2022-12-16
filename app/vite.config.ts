@@ -10,7 +10,8 @@ module.exports = defineConfig({
   root: './app/',
   plugins: [vue(), void eslint()],
   define: {
-    __VUE_OPTIONS_API__: false
+    __VUE_OPTIONS_API__: false,
+    __VITE_BUILD_TIMESTAMP__: JSON.stringify(new Date())
   },
   server: {
     port: 8443,

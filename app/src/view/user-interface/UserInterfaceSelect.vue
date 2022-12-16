@@ -7,13 +7,13 @@
         :options="options"
         label="Select"
       />
-      <ui-button
+      <ui-icon-button
         seriousness="secondary"
         appearance="text"
+        icon="erase"
+        size="large"
         @click="value = undefined"
-      >
-        Reset
-      </ui-button>
+      />
     </div>
     <div class="d-flex g2">
       <ui-select
@@ -21,13 +21,13 @@
         :options="optionsLong"
         label="Select long"
       />
-      <ui-button
+      <ui-icon-button
         seriousness="secondary"
         appearance="text"
+        icon="erase"
+        size="large"
         @click="valueLong = undefined"
-      >
-        Reset
-      </ui-button>
+      />
     </div>
     <div class="d-flex g2">
       <ui-select
@@ -35,13 +35,13 @@
         :options="optionsSmall"
         label="Select with small amount"
       />
-      <ui-button
+      <ui-icon-button
         seriousness="secondary"
         appearance="text"
+        icon="erase"
+        size="large"
         @click="valueSmall = undefined"
-      >
-        Reset
-      </ui-button>
+      />
     </div>
     <div class="d-flex g2">
       <ui-select
@@ -49,13 +49,13 @@
         :options="optionsWithOption"
         label="Select with default option"
       />
-      <ui-button
+      <ui-icon-button
         seriousness="secondary"
         appearance="text"
+        icon="erase"
+        size="large"
         @click="valueWithOption = undefined"
-      >
-        Reset
-      </ui-button>
+      />
     </div>
     <ui-select
       label="Select empty"
@@ -76,13 +76,14 @@
         label="Tree Select"
         :options="treeSelectOptions"
       />
-      <ui-button
-        seriousness="secondary"
+      <ui-icon-button
+        seriousness="danger"
         appearance="text"
+        icon="erase"
+        size="large"
+        :disabled="!treeSelectValue"
         @click="treeSelectValue = undefined"
-      >
-        Reset
-      </ui-button>
+      />
     </div>
     <ui-input-color
       model-value="#999999"
@@ -101,8 +102,8 @@ import UiInputColor from '@/components/ui/input/color/UiInputColor.vue'
 import UiInputText from '@/components/ui/input/UiInputText.vue'
 import UiInputTextarea from '@/components/ui/input/UiInputTextarea.vue'
 import UiTreeSelect from '@/components/ui/tree-select/UiTreeSelect.vue'
-import UiButton from '@/components/ui/UiButton.vue'
 import UiCard from '@/components/ui/UiCard.vue'
+import UiIconButton from '@/components/ui/UiIconButton.vue'
 import UiSelect from '@/components/ui/UiSelect.vue'
 import { Ref, ref } from 'vue'
 
@@ -212,7 +213,8 @@ const text = ref<string>(`.dimensional {
     height: 100%;
     transform: rotateY(-90deg) translateZ(-180px);
     --border-color: var(--surface-border-a);
-    border: 2px solid var(--border-color);
+    // border: 2px solid var(--border-color);
+    box-shadow: inset 0 0 2px 1px var(--border-color);
   }
 
   &:focus-within::after,

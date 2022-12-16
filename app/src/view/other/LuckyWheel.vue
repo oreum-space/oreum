@@ -68,7 +68,7 @@ import UiInputColor from '@/components/ui/input/color/UiInputColor.vue'
 import UiInputText from '@/components/ui/input/UiInputText.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiCard from '@/components/ui/UiCard.vue'
-import UiAsyncButton from '@/components/UiAsyncButton.vue'
+import UiAsyncButton from '@/components/ui/UiAsyncButton.vue'
 import { computed, ref } from 'vue'
 
 interface ItemBase {

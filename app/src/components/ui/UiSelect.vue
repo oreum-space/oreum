@@ -52,11 +52,6 @@
       class="ui-select__button ui-input ui-input-text__input"
       :tabindex="disabled ? undefined : '0'"
       @click="buttonClick"
-      @keydown.space="open = true"
-      @keydown.esc="close"
-      @keydown.enter="buttonClick"
-      @keydown.up.left="keydownUpHandler"
-      @keydown.down.right="keydownDownHandler"
       @keydown="keydownPagesHandler"
     >
       <transition name="ui-select__value">
@@ -101,7 +96,8 @@ type Props = {
   label?: string,
   modelValue?: TModelValue,
   options?: Array<TModelValue>,
-  disabled?: boolean
+  disabled?: boolean,
+  keydownActions?: Record<string, () => unknown>
 }
 
 type Emits = {
@@ -111,7 +107,8 @@ type Emits = {
 const props = withDefaults(defineProps<Props>(), {
   label: undefined,
   modelValue: undefined,
-  options: () => []
+  options: () => [],
+  keydownActions: () => ({})
 })
 
 const emits = defineEmits<Emits>()
@@ -217,8 +214,10 @@ function updateModelValue (value: TModelValue): void {
   emits('update:modelValue', value)
   const index = props.options.findIndex(option => value === option)
   const item = list.value.children.item(index)
-  if (item) {
+  if (item?.clientHeight) {
     item.scrollIntoView({ block: 'center' })
+  } else {
+    select.value.scrollIntoView({ block: 'center' })
   }
 }
 
@@ -247,23 +246,32 @@ function keydownDownHandler () {
   updateModelValueByIndex(Math.min(getCurrentIndex() + 1, (props.options ? props.options.length - 1 : 0)))
 }
 
-function keydownPagesHandler (event: KeyboardEvent) {
-  if (event.key === 'Home') {
+const keydownActions: Exclude<Props['keydownActions'], undefined> = {
+  ['Space'] () {
+    open.value = true
+  },
+  ['Home'] () {
     updateModelValueByIndex(0)
-    return
-  }
-  if (event.key === 'End') {
+  },
+  ['End'] () {
     updateModelValueByIndex(-1)
-    return
-  }
-  if (event.key === 'PageUp') {
+  },
+  ['Escape']: close,
+  ['Enter']: close,
+  ['ArrowUp']: keydownUpHandler,
+  ['ArrowLeft']: keydownUpHandler,
+  ['ArrowDown']: keydownDownHandler,
+  ['ArrowRight']: keydownDownHandler,
+  ['PageUp'] () {
     updateModelValueByIndex(Math.max(getCurrentIndex() - 10, 0))
-    return
-  }
-  if (event.key === 'PageDown') {
+  },
+  ['PageDown'] () {
     updateModelValueByIndex(getCurrentIndex() + 10)
-    return
   }
+}
+
+function keydownPagesHandler (event: KeyboardEvent): void {
+  (props.keydownActions[event.code] || keydownActions[event.code])?.()
 }
 
 const preventedCodes = [
@@ -286,6 +294,7 @@ function preventScrolling (event: KeyboardEvent) {
 
 defineExpose({
   updateModelValue,
-  close
+  close,
+  open
 })
 </script>

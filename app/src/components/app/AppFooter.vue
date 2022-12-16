@@ -21,14 +21,13 @@
 >
 import { inject, onMounted, Ref } from 'vue'
 
-const buildTimestamp =
-  new Date(document.head.querySelector<HTMLMetaElement>('[name="build-timestamp"]')!.content).toLocaleString()
+const buildTimestamp = new Date(__VITE_BUILD_TIMESTAMP__).toLocaleString()
 const emits = defineEmits<{
   (e: 'mounted'): void
 }>()
 onMounted(() => emits('mounted'))
-const windowHeight = inject<Ref<number>>('windowHeight')!
-const windowWidth = inject<Ref<number>>('windowWidth')!
+const windowHeight = inject('windowHeight') as Ref<number>
+const windowWidth = inject('windowWidth') as Ref<number>
 
 </script>
 

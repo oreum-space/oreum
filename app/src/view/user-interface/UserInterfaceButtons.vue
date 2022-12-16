@@ -54,16 +54,18 @@
             </code>
           </td>
           <td :colspan="buttonSeriousness.length">
-            <div class="d-flex align-center g2">
-              <code>disabled:</code>
-              <ui-switch v-model="disabled" />
-            </div>
-            <div class="d-flex align-center g2">
-              <code>size:</code>
-              <ui-select
-                v-model="size"
-                :options="sizes"
-              />
+            <div class="d-flex g4">
+              <div class="d-flex align-center g2">
+                <code>disabled:</code>
+                <ui-switch v-model="disabled" />
+              </div>
+              <div class="d-flex align-center g2">
+                <code>size:</code>
+                <ui-select
+                  v-model="size"
+                  :options="sizes"
+                />
+              </div>
             </div>
           </td>
         </tr>
@@ -124,9 +126,97 @@
             </code>
           </td>
           <td :colspan="buttonSeriousness.length">
-            <label class="d-flex align-center g2">
-              <code>disabled:</code><ui-switch v-model="disabled" />
-            </label>
+            <div class="d-flex g4">
+              <div class="d-flex align-center g2">
+                <code>disabled:</code>
+                <ui-switch v-model="disabled" />
+              </div>
+              <div class="d-flex align-center g2">
+                <code>size:</code>
+                <ui-select
+                  v-model="size"
+                  :options="sizes"
+                />
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tfoot>
+    </ui-table-accordion>
+    <ui-table-accordion>
+      <template #caption>
+        &lt;ui-icon-button&gt;&lt;/ui-icon-button&gt; {{ progress?.toFixed(2) }}
+      </template>
+      <thead>
+        <tr>
+          <ui-table-cell-diagonal
+            column-text="appearance"
+            row-text="seriousness"
+          />
+          <th
+            v-for="seriousness of buttonSeriousness"
+            :key="seriousness"
+          >
+            {{ seriousness }}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          v-for="appearance of buttonAppearance"
+          :key="appearance"
+        >
+          <td
+            class="ui-table__col_primary"
+          >
+            {{ appearance || 'unset' }}
+          </td>
+          <td
+            v-for="seriousness of buttonSeriousness"
+            :key="seriousness"
+          >
+            <ui-icon-button
+              :appearance="appearance"
+              :seriousness="seriousness"
+              :icon="icon"
+              :size="_sizes[size]"
+              :disabled="disabled"
+            >
+              Async
+            </ui-icon-button>
+          </td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td>
+            <code>
+              <b>
+                Options
+              </b>
+            </code>
+          </td>
+          <td :colspan="buttonSeriousness.length">
+            <div class="d-flex g4">
+              <div class="d-flex align-center g2">
+                <code>disabled:</code>
+                <ui-switch v-model="disabled" />
+              </div>
+              <div class="d-flex align-center g2">
+                <code>size:</code>
+                <ui-select
+                  v-model="size"
+                  :options="sizes"
+                />
+              </div>
+              <div class="d-flex align-center g2">
+                <code>icon:</code>
+                <ui-select
+                  v-model="icon"
+                  :options="icons"
+                />
+              </div>
+            </div>
           </td>
         </tr>
       </tfoot>
@@ -142,9 +232,10 @@ import UiTableAccordion from '@/components/ui/table/UiTableAccordion.vue'
 import UiTableCellDiagonal from '@/components/ui/table/UiTableCellDiagonal.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiCard from '@/components/ui/UiCard.vue'
+import UiIconButton from '@/components/ui/UiIconButton.vue'
 import UiSelect from '@/components/ui/UiSelect.vue'
 import UiSwitch from '@/components/ui/UiSwitch.vue'
-import UiAsyncButton from '@/components/UiAsyncButton.vue'
+import UiAsyncButton from '@/components/ui/UiAsyncButton.vue'
 import { ref } from 'vue'
 
 const buttonSeriousness = ['primary', 'secondary', 'success', 'info', 'warning', 'danger', 'passive'] as const
@@ -153,6 +244,8 @@ const disabled = ref<boolean>(false)
 const progress = ref<undefined | number>(undefined)
 const size = ref<'small' | 'large' | 'default'>('default')
 const sizes = ['small', 'large', 'default']
+const icons = ['erase', 'blob', 'select-arrow', 'user', 'new-user']
+const icon = ref<(typeof icons)[number]>(icons[0])
 const _sizes = {
   small: 'small',
   large: 'large',

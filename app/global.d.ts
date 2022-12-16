@@ -1,0 +1,1 @@
+declare readonly const __VITE_BUILD_TIMESTAMP__: string

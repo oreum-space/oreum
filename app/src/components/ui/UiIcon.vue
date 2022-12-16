@@ -18,15 +18,15 @@
 import icons from '@/assets/icon.svg'
 
 type Props = {
+  icon?: string,
   width?: number,
-  height?: number,
-  icon?: string
+  height?: number
 }
 
 withDefaults(defineProps<Props>(), {
+  icon: 'blob',
   width: 24,
-  height: (props) => props.width || 24,
-  icon: 'blob'
+  height: (props) => props.width || 24
 })
 </script>
 

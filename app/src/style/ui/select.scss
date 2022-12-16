@@ -46,6 +46,12 @@
     }
   }
 
+  &__value,
+  &__list,
+  &__option {
+    scrollbar-width: none;
+  }
+
   &__value::-webkit-scrollbar,
   &__list::-webkit-scrollbar,
   &__option::-webkit-scrollbar {
@@ -119,6 +125,7 @@
     text-overflow: ellipsis;
     max-width: 100%;
     overflow: clip;
+    transition: background-color var(--transition-fast);
 
     &:hover {
       background-color: var(--surface-c);

@@ -33,7 +33,7 @@
 import UiInputText from '@/components/ui/input/UiInputText.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiSelect from '@/components/ui/UiSelect.vue'
-import UiAsyncButton from '@/components/UiAsyncButton.vue'
+import UiAsyncButton from '@/components/ui/UiAsyncButton.vue'
 import { ref } from 'vue'
 
 const methods = ['GET', 'PUT', 'POST', 'HEAD', 'PATCH', 'DELETE', 'OPTIONS']
