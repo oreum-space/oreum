@@ -6,6 +6,10 @@
   align-items: center;
 }
 
+.justify-between {
+  justify-content: space-between;
+}
+
 .f-row {
   flex-flow: row;
 }

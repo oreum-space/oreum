@@ -56,6 +56,11 @@ const routes: Array<RouteRecordRaw> = [
         name: 'UserInterfaceSelect',
         path: '/user-interface/select',
         component: () => import('@/view/user-interface/UserInterfaceSelect.vue')
+      },
+      {
+        name: 'UserInterfaceDialog',
+        path: '/user-interface/dialog',
+        component: () => import('@/view/user-interface/UserInterfaceDialog.vue')
       }
     ]
   },

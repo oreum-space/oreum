@@ -13,17 +13,23 @@
   >
     <ui-icon-button
       v-if="isDirectory"
-      class="ui-tree-select-item__toggle"
       appearance="text"
       seriousness="secondary"
       icon="collapse-arrow"
       size="small"
       @click.stop="collapsed = !collapsed"
     />
+    <ui-icon-button
+      v-else
+      appearance="text"
+      seriousness="secondary"
+      icon="dot"
+      size="small"
+    />
     <div class="ui-tree-select-item__content">
       <slot
         :item="item"
-        :is-directory="isDirectory"
+        :directory="isDirectory"
       >
         {{ item[valueKey] }}
       </slot>
@@ -47,7 +53,7 @@
         <template v-if="$slots.default">
           <slot
             :item="item"
-            :is-directory="isDirectory"
+            :directory="isDirectory"
           />
         </template>
       </ui-tree-select-item>
@@ -118,7 +124,7 @@ defineExpose({
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 8px 8px calc(28px + var(--deep) * 12px);
+  padding: 8px 8px 8px calc(8px + var(--deep) * 12px);
   cursor: pointer;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -128,10 +134,6 @@ defineExpose({
   transition: background-color var(transition-fast);
   scrollbar-width: none;
   line-height: 24px;
-
-  &_directory {
-    padding: 8px 8px 8px calc(8px + var(--deep) * 12px);
-  }
 
   svg {
     transition: rotate var(--transition-default);
@@ -164,8 +166,14 @@ defineExpose({
     }
   }
 
-  &__toggle {
+  .ui-icon-button {
     margin: -2px;
+  }
+
+  &__content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 }
 </style>

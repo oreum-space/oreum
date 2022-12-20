@@ -7,6 +7,16 @@
     :model-value="modelValue"
     :keydown-actions="keydownActions"
   >
+    <template
+      v-if="$slots.selected"
+      #selected="{ close }"
+    >
+      <slot
+        name="selected"
+        :selected="currentItem"
+        :close="close"
+      />
+    </template>
     <template #list>
       <ui-tree-select-item
         v-for="item of computedItems"
@@ -18,7 +28,18 @@
         :model-value="modelValue"
         :directories-disabled="directoriesDisabled"
         :update-model-value="updateModelValueThenClose"
-      />
+      >
+        <template
+          v-if="$slots.item"
+          #default="{ item: item0, directory }"
+        >
+          <slot
+            name="item"
+            :item="item0"
+            :directory="directory"
+          />
+        </template>
+      </ui-tree-select-item>
     </template>
     <template
       v-if="$slots['no-options']"

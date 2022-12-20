@@ -29,6 +29,9 @@
     text-overflow: ellipsis;
     max-width: 100%;
     overflow: clip;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 
     &:hover {
       overflow-x: scroll;

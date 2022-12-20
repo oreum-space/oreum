@@ -71,11 +71,6 @@
       code
     />
     <div class="d-flex g2">
-      <ui-tree-select-old
-        v-model="treeSelectValue"
-        label="Tree Select"
-        :options="treeSelectOptions"
-      />
       <ui-tree-select
         v-model="treeSelectValue"
         label="Tree Select"
@@ -117,7 +112,6 @@
 import UiInputColor from '@/components/ui/input/color/UiInputColor.vue'
 import UiInputText from '@/components/ui/input/UiInputText.vue'
 import UiInputTextarea from '@/components/ui/input/UiInputTextarea.vue'
-import UiTreeSelectOld from '@/components/ui/tree-select/old/UiTreeSelectOld.vue'
 import UiTreeSelect from '@/components/ui/tree-select/UiTreeSelect.vue'
 import UiCard from '@/components/ui/UiCard.vue'
 import UiIcon from '@/components/ui/UiIcon.vue'

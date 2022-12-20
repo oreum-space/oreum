@@ -1,5 +1,6 @@
 <template>
   <template v-if="$route.name">
+    <app-dialog />
     <transition name="app-header">
       <app-header
         ref="header"
@@ -7,7 +8,6 @@
       />
     </transition>
     <app-main />
-    <!-- TODO: <app-dialog /> -->
     <app-footer
       ref="footer"
       @mounted="addFooterResizeListener"
@@ -20,6 +20,7 @@
   setup
   lang="ts"
 >
+import AppDialog from '@/components/app/AppDialog.vue'
 import AppHeader from '@/components/app/AppHeader.vue'
 import AppMain from '@/components/app/AppMain.vue'
 import AppFooter from '@/components/app/AppFooter.vue'

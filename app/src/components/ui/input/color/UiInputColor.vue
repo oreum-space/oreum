@@ -430,6 +430,7 @@ function setColorModel (v: Ref['value']) {
     border: 1px solid;
     outline: 2px solid currentcolor;
     outline-offset: -2px;
+    padding-block: 9px;
 
     &:not(:hover):not(:focus) {
       outline-color: transparent;
@@ -455,7 +456,9 @@ function setColorModel (v: Ref['value']) {
       display: none;
     }
 
+    .ui-select,
     .ui-input {
+      --width: 256px !important;
       width: 256px;
     }
 

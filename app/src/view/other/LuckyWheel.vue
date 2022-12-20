@@ -29,34 +29,133 @@
           </h2>
         </div>
       </div>
-    </div>
-    <ui-card class="other-lucky-wheel__actions ga">
-      <ui-input-text
-        v-model="name"
-        label="Name"
-      />
-      <ui-input-text
-        v-model="value"
-        label="Value"
-      />
-      <div class="d-flex ga">
-        <ui-input-color v-model="color" />
-        <ui-button
-          appearance="outlined"
-          seriousness="success"
-          @click="addItem"
-        >
-          Add
-        </ui-button>
-      </div>
-      <ui-async-button
-        seriousness="info"
+      <ui-button
+        class="other-lucky-wheel__add"
         size="large"
+        seriousness="success"
+        appearance="outlined"
+        @click="dialog.show('lucky-wheel')"
+      >
+        <ui-icon
+          icon="plus"
+        />
+        Add
+      </ui-button>
+      <ui-button
+        class="other-lucky-wheel__start"
+        size="large"
+        seriousness="primary"
+        appearance="outlined"
         @click="wheel"
       >
+        <ui-icon
+          icon="dot"
+        />
         Wheel
-      </ui-async-button>
-    </ui-card>
+      </ui-button>
+    </div>
+    <ui-dialog
+      classes="other-lucky-wheel__dialog"
+      name="lucky-wheel"
+      title="New element"
+      disable-footer
+    >
+      <template #body>
+        <ui-tree-select
+          v-model="element"
+          label="Element"
+          :options="elements"
+        >
+          <template #selected="{ selected }">
+            <div
+              :style="{
+                width: '16px',
+                height: '16px',
+                borderRadius: '4px',
+                backgroundColor: selected?.value.color || '#888888',
+                border: '1px solid var(--surface-border-a)'
+              }"
+            />
+            <span>
+              {{ selected?.value.name || '-' }}
+            </span>
+            <small>
+              <code>
+                {{ selected?.value.value || '-' }}
+              </code>
+            </small>
+          </template>
+          <template #item="{ item }">
+            <div
+              :style="{
+                width: '16px',
+                height: '16px',
+                borderRadius: '4px',
+                backgroundColor: item.value.color,
+                border: '1px solid var(--surface-border-a)'
+              }"
+            />
+            <span>
+              {{ item.value.name }}
+            </span>
+            <small>
+              <code>
+                {{ item.value.value }}
+              </code>
+            </small>
+          </template>
+        </ui-tree-select>
+        <div class="other-lucky-wheel__general">
+          <ui-input-text
+            v-model="name"
+            label="Name"
+          />
+          <ui-input-text
+            v-model="value"
+            label="Value"
+          />
+        </div>
+        <div class="other-lucky-wheel__background">
+          <ui-select
+            v-model="background"
+            label="Background"
+            :options="backgrounds"
+          />
+          <ui-input-color
+            v-if="background === backgrounds[1]"
+            v-model="color"
+          />
+          <ui-input-text
+            v-else
+            v-model="image"
+            label="Image URL"
+          />
+        </div>
+        <div class="d-flex f-row g2 justify-between">
+          <ui-button
+            size="small"
+            seriousness="success"
+            appearance="text"
+          >
+            <ui-icon
+              icon="plus"
+            />
+            Save
+          </ui-button>
+          <ui-button
+            size="small"
+            seriousness="success"
+            appearance="default"
+            @click="addItem"
+          >
+            <ui-icon
+              icon="plus"
+            />
+            Add
+          </ui-button>
+        </div>
+      </template>
+    </ui-dialog>
   </main>
 </template>
 
@@ -66,9 +165,12 @@
 >
 import UiInputColor from '@/components/ui/input/color/UiInputColor.vue'
 import UiInputText from '@/components/ui/input/UiInputText.vue'
+import UiTreeSelect from '@/components/ui/tree-select/UiTreeSelect.vue'
 import UiButton from '@/components/ui/UiButton.vue'
-import UiCard from '@/components/ui/UiCard.vue'
-import UiAsyncButton from '@/components/ui/UiAsyncButton.vue'
+import UiDialog from '@/components/ui/UiDialog.vue'
+import UiIcon from '@/components/ui/UiIcon.vue'
+import UiSelect from '@/components/ui/UiSelect.vue'
+import useDialog from '@/store/dialog'
 import { computed, ref } from 'vue'
 
 interface ItemBase {
@@ -85,6 +187,49 @@ interface ItemColor extends ItemBase {
 }
 
 type Item = ItemImage | ItemColor
+
+const defaultItems = [
+  {
+    value: {
+      name: 'Item 1 Lorem ipsum dolor sit amet.',
+      value: 6,
+      color: 'darkred'
+    }
+  }, {
+    value: {
+      name: 'Item 2 Lorem ipsum dolor sit amet.',
+      value: 3,
+      color: 'darkblue'
+    }
+  }, {
+    value: {
+      name: 'Item 3 Lorem ipsum dolor sit amet.',
+      value: 1,
+      color: 'darkgreen'
+    }
+  }
+]
+
+const custom = {
+  value: {
+    name: 'Custom',
+    value: 1,
+    color: '#888888'
+  }
+}
+
+const elements = computed(() => {
+  return [
+    custom,
+    ...defaultItems
+  ]
+})
+
+const backgrounds = ['Image', 'Color']
+
+const background = ref<string>(backgrounds[1])
+
+const element = ref<unknown>(custom.value)
 
 const items = ref<Array<Item>>([
   {
@@ -104,9 +249,11 @@ const items = ref<Array<Item>>([
 const name = ref<string>('')
 const value = ref<string>('1')
 const color = ref<string>('#888888')
+const image = ref<string>('')
 
 const totalValue = computed(() => items.value.reduce((a, _) => a + _.value, 0))
 const angle = ref<number>(0)
+const dialog = useDialog()
 
 function isItemColor (item: Item): item is ItemColor {
   return 'color' in item
@@ -158,8 +305,8 @@ function getHalf (item: Item): string {
 
 function getItemStyle (item: Item): Record<string, string> {
   return {
-    backgroundColor: isItemColor(item) ? item.color : 'gray',
-    clipPath: getClipPath(item),
+    '--background-color': isItemColor(item) ? item.color : 'gray',
+    '--clip-path': getClipPath(item),
     '--rotate': getRotate(item),
     '--half': getHalf(item)
   }
@@ -191,6 +338,7 @@ function addItem (): void {
   flex-flow: row;
   gap: var(--app-padding);
   align-items: center;
+  justify-content: center;
   max-height: calc(var(--fvh) - var(--header-height));
   overflow: hidden;
 
@@ -262,8 +410,10 @@ function addItem (): void {
     transform-origin: 50% 50%;
     height: 100%;
     width: 100%;
-    background: red;
     rotate: var(--rotate);
+    border-radius: 50%;
+    background-color: var(--background-color);
+    clip-path: var(--clip-path);
   }
 
   &__item-name {
@@ -303,41 +453,85 @@ function addItem (): void {
     }
   }
 
-  &__actions {
-    flex-grow: 1;
+  &__start {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+  }
+
+  &__add {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+  }
+
+  &__dialog .ui-dialog__body {
+    & > .ui-input-text,
+    & > .ui-select {
+      --width: min(calc(100vw - 64px), 480px);
+    }
+  }
+
+  &__dialog {
+    .ui-tree-select-item__content {
+      max-width: 100%;
+      width: 100%;
+      span {
+        display: flex;
+        flex: 1 1;
+      }
+
+      code {
+        flex-shrink: 0;
+      }
+    }
+  }
+
+  &__general {
+    display: flex;
+    flex-flow: row;
+    justify-content: space-between;
+    gap: 12px;
+    max-width: calc(100vw - 64px);
+
+    & .ui-input-text:first-child {
+      --width: 100%;
+    }
+
+    & .ui-input-text:last-child {
+      --width: 128px;
+    }
+  }
+
+  &__background {
+    display: flex;
+    flex-flow: row;
+    justify-content: space-between;
+    --width: 128px;
+    gap: 12px;
+    max-width: calc(100vw - 64px);
 
     .ui-input-text {
       --width: 100%;
     }
-  }
-}
 
-@media (max-aspect-ratio: 4 / 3) {
-  .other-lucky-wheel {
-    flex-flow: column;
-    justify-content: space-between;
-
-    &__wheel {
-      margin: auto;
-    }
-
-    &__actions {
+    .ui-input-color,
+    .ui-input-color__button {
+      max-width: 100%;
       width: 100%;
-      flex-flow: row;
-      order: -1;
-      flex-grow: 0;
-
-      .ui-input-text {
-        flex-grow: 1;
-      }
-
-      .d-flex {
-        flex-grow: 2;
-        width: 100%;
-      }
     }
   }
 }
+
+@media (max-aspect-ratio: 8 / 10) {
+  .other-lucky-wheel {
+    &__start,
+    &__add {
+      translate: 0 calc(100% + 8px);
+    }
+  }
+}
+
 
 @media (max-width: 768px) {
   .other-lucky-wheel {
