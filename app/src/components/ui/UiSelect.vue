@@ -76,7 +76,7 @@
       </span>
       <ui-icon
         class="ui-select__arrow"
-        icon="select-arrow"
+        icon="dropdown-arrow"
       />
     </div>
   </div>
@@ -170,7 +170,7 @@ function update () {
 }
 
 onBeforeUnmount(() => {
-  popper.destroy()
+  popper?.destroy()
   removeEventListener('pointerdown', pointerdownHandler)
 })
 

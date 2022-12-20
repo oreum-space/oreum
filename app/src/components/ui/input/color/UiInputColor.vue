@@ -61,8 +61,8 @@
                 @click="copyColorModelValue($event); close()"
               >
                 <ui-icon
-                  :width="12"
-                  icon="copy-small"
+                  size="small"
+                  icon="copy"
                 />{{ getValue(selected?.value).value }}
               </small>
             </div>
@@ -382,7 +382,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   if (popper) {
-    popper.destroy()
+    popper?.destroy()
   }
   removeEventListener('pointerdown', pointerdownHandler)
 })
@@ -539,10 +539,6 @@ function setColorModel (v: Ref['value']) {
       outline: 1px solid var(--primary-color);
       color: var(--primary-color);
       background-color: transparent;
-    }
-
-    svg {
-      min-width: 12px;
     }
   }
 

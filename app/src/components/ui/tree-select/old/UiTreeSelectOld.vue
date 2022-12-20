@@ -12,7 +12,7 @@
         v-for="option of options"
         :key="option"
       >
-        <ui-tree-select-branch
+        <ui-tree-select-branch-old
           v-if="option.type === 'branch'"
           ref="branches"
           :selected="modelValue"
@@ -30,8 +30,8 @@
               name="node"
             />
           </template>
-        </ui-tree-select-branch>
-        <ui-tree-select-node
+        </ui-tree-select-branch-old>
+        <ui-tree-select-node-old
           v-else
           :selected="modelValue"
           :option="option"
@@ -40,7 +40,7 @@
           <slot
             name="node"
           />
-        </ui-tree-select-node>
+        </ui-tree-select-node-old>
       </template>
     </template>
     <template
@@ -57,8 +57,8 @@
   lang="ts"
 >
 import UiSelect from '@/components/ui/UiSelect.vue'
-import UiTreeSelectBranch from '@/components/ui/tree-select/UiTreeSelectBranch.vue'
-import UiTreeSelectNode from '@/components/ui/tree-select/UiTreeSelectNode.vue'
+import UiTreeSelectBranchOld from '@/components/ui/tree-select/old/UiTreeSelectBranchOld.vue'
+import UiTreeSelectNodeOld from '@/components/ui/tree-select/old/UiTreeSelectNodeOld.vue'
 import { computed, ref } from 'vue'
 import type { Ref } from 'vue'
 
@@ -126,7 +126,7 @@ function findParent (possibleParent: TCurrent['parent'], value: TModelValue): TC
   }
 }
 
-const branches = ref<typeof UiTreeSelectBranch>()
+const branches = ref<typeof UiTreeSelectBranchOld>()
 
 function sendToggle (rightArrow = false): boolean {
   if (branches.value) {
@@ -237,73 +237,75 @@ function updateModelValue (value: TModelValue, close = true): void {
 }
 </script>
 
-<style lang="scss">
-.ui-tree-select-node,
-.ui-tree-select-branch__content {
-  padding: 8px 8px;
-  cursor: pointer;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  max-width: 100%;
-  overflow: clip;
-  border-radius: 4px;
-  transition: background-color var(--transition-fast);
-  scrollbar-width: none;
+<style lang="scss" scoped>
+.ui-tree-select::v-deep {
+  .ui-tree-select-node,
+  .ui-tree-select-branch__content {
+    padding: 8px 8px;
+    cursor: pointer;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    overflow: clip;
+    border-radius: 4px;
+    transition: background-color var(--transition-fast);
+    scrollbar-width: none;
 
-  &:hover {
-    background-color: var(--surface-c);
-    overflow-x: scroll;
-    text-overflow: unset;
-  }
-  
-  &::-webkit-scrollbar {
-    display: none;
-  }
+    &:hover {
+      background-color: var(--surface-c);
+      overflow-x: scroll;
+      text-overflow: unset;
+    }
 
-  &_selected {
-    background-color: var(--primary-color);
-    color: var(--primary-color-text);
+    &::-webkit-scrollbar {
+      display: none;
+    }
 
-    .ui-button {
+    &_selected {
+      background-color: var(--primary-color);
       color: var(--primary-color-text);
+
+      .ui-button {
+        color: var(--primary-color-text);
+      }
+    }
+
+    &_selected:hover {
+      background-color: var(--primary-color-hover);
     }
   }
 
-  &_selected:hover {
-    background-color: var(--primary-color-hover);
-  }
-}
-
-.ui-tree-select .ui-select__list {
-  padding-inline: 4px;
-}
-
-.ui-tree-select-branch__content {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.ui-tree-select-branch__toggle {
-  padding: 4px;
-  margin: -6px -4px;
-  background-clip: content-box;
-  border-radius: 8px;
-
-  svg {
-    transition: var(--transition-default);
+  .ui-select__list {
+    padding-inline: 4px;
   }
 
-  &_collapsed svg {
-    rotate: -90deg;
+  .ui-tree-select-branch__content {
+    display: flex;
+    gap: 8px;
+    align-items: center;
   }
-}
 
-.ui-tree-select-branch .ui-tree-select-branch {
-  padding-left: 12px;
-}
+  .ui-tree-select-branch__toggle {
+    padding: 4px;
+    margin: -6px -4px;
+    background-clip: content-box;
+    border-radius: 8px;
 
-.ui-tree-select-branch .ui-tree-select-node {
-  margin-left: 32px;
+    svg {
+      transition: var(--transition-default);
+    }
+
+    &_collapsed svg {
+      rotate: -90deg;
+    }
+  }
+
+  .ui-tree-select-branch .ui-tree-select-branch {
+    padding-left: 12px;
+  }
+
+  .ui-tree-select-branch .ui-tree-select-node {
+    margin-left: 32px;
+  }
 }
 </style>

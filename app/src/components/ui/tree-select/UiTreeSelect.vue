@@ -8,40 +8,17 @@
     :keydown-actions="keydownActions"
   >
     <template #list>
-      <template
-        v-for="option of options"
-        :key="option"
-      >
-        <ui-tree-select-branch
-          v-if="option.type === 'branch'"
-          ref="branches"
-          :selected="modelValue"
-          :option="option"
-          @select-option="updateModelValue"
-        >
-          <slot
-            name="branch"
-          />
-          <template
-            v-if="$slots.node"
-            #node
-          >
-            <slot
-              name="node"
-            />
-          </template>
-        </ui-tree-select-branch>
-        <ui-tree-select-node
-          v-else
-          :selected="modelValue"
-          :option="option"
-          @select-option="updateModelValue"
-        >
-          <slot
-            name="node"
-          />
-        </ui-tree-select-node>
-      </template>
+      <ui-tree-select-item
+        v-for="item of computedItems"
+        :key="item[valueKey]"
+        ref="items"
+        :item="item"
+        :items-key="itemsKey"
+        :value-key="valueKey"
+        :model-value="modelValue"
+        :directories-disabled="directoriesDisabled"
+        :update-model-value="updateModelValueThenClose"
+      />
     </template>
     <template
       v-if="$slots['no-options']"
@@ -56,68 +33,77 @@
   setup
   lang="ts"
 >
+import UiTreeSelectItem from '@/components/ui/tree-select/UiTreeSelectItem.vue'
 import UiSelect from '@/components/ui/UiSelect.vue'
-import UiTreeSelectBranch from '@/components/ui/tree-select/UiTreeSelectBranch.vue'
-import UiTreeSelectNode from '@/components/ui/tree-select/UiTreeSelectNode.vue'
 import { computed, ref } from 'vue'
-import type { Ref } from 'vue'
-
-type TModelValue = Ref['value']
-
-type TUiTreeSelectBranch = {
-  type: 'branch',
-  children: Array<TUiTreeSelectBranch | RUiTreeSelectNode>
-  value: TModelValue
-}
-
-type RUiTreeSelectNode = TModelValue
+import { IndexSymbol, InstanceSymbol, ParentSymbol, TItem, TItemRaw } from './ui-tree-select'
 
 type Props = {
   label?: string,
-  modelValue?: TModelValue,
-  options?: Array<TUiTreeSelectBranch | RUiTreeSelectNode>,
+  valueKey?: string,
+  itemsKey?: string,
+  modelValue?: RefAny,
+  options?: Array<TItemRaw>,
   disabled?: boolean,
-  selectableBranches?: boolean
+  directoriesDisabled?: boolean
 }
 
 type Emits = {
-  (e: 'update:modelValue', value: TModelValue): void
+  (e: 'update:modelValue', value: RefAny): void
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  label: undefined,
+  label: '',
+  valueKey: 'value',
+  itemsKey: 'items',
   modelValue: undefined,
   options: () => [],
-  selectableBranches: false
+  disabled: false,
+  directoriesDisabled: false
 })
 
 const emits = defineEmits<Emits>()
 
-const select = ref<typeof UiSelect>() as Ref<typeof UiSelect>
+const items = ref<Array<InstanceType<typeof UiTreeSelectItem>>>()
+const select = ref<InstanceType<typeof UiSelect>>()
 
-type TCurrent = {
-  parent: Props['options'] | TUiTreeSelectBranch,
-  self: TModelValue
-}
+function recursiveItems (options = props.options, instances = items.value, parent?: TItem): Array<TItem> {
+  const result: Array<TItem> = []
 
-function childrenFromParent (parent: Exclude<Props['options'], undefined> | TUiTreeSelectBranch): Array<TModelValue> {
-  return Array.isArray(parent) ? parent : parent.children
-}
+  for (const index in options) {
+    const option = options[index]
+    const instance = instances?.[index]
+    const item: TItem = {
+      [IndexSymbol]: parseInt(index),
+      [props.valueKey]: option[props.valueKey] || option,
+      [InstanceSymbol]: instance,
+      [ParentSymbol]: parent
+    }
 
-function findParent (possibleParent: TCurrent['parent'], value: TModelValue): TCurrent['parent'] | undefined {
-  if (!possibleParent) {
-    return
+    if (option[props.itemsKey]) {
+      item[props.itemsKey] = recursiveItems(option[props.itemsKey], instance?.items, item)
+    }
+
+    result.push(item)
   }
 
-  const children: Array<TUiTreeSelectBranch | TModelValue> = childrenFromParent(possibleParent)
+  return result
+}
 
-  if (children.find(_ => _ === value || _.value === value)) {
-    return possibleParent
+const computedItems = ref<Array<TItem>>(recursiveItems())
+
+function findRecursive (currentItems = computedItems.value): TItem | undefined {
+  if (!currentItems) {
+    return undefined
   }
 
-  for (const child of children) {
-    if (child.type === 'branch') {
-      const result = findParent(child, value)
+  for (const currentItem of currentItems) {
+    if (props.modelValue === (currentItem[props.valueKey] || currentItem)) {
+      return currentItem
+    }
+
+    if (currentItem[props.itemsKey]) {
+      const result = findRecursive(currentItem[props.itemsKey])
 
       if (result) {
         return result
@@ -126,184 +112,174 @@ function findParent (possibleParent: TCurrent['parent'], value: TModelValue): TC
   }
 }
 
-const branches = ref<typeof UiTreeSelectBranch>()
+const currentItem = computed<TItem | undefined>(findRecursive)
 
-function sendToggle (rightArrow = false): boolean {
-  if (branches.value) {
-    if (Array.isArray(branches.value)) {
-      for (const branch of branches.value) {
-        if (branch.toggleIfSelected(rightArrow)) {
-          return true
-        }
-      }
-    } else {
-      return branches.value.toggleIfSelected(rightArrow)
-    }
+function openIfClosed (): boolean {
+  return select.value?.open === false
+    ? select.value.open = true
+    : false
+}
+
+function setRecursiveGrandParentNext (parent: TItem | undefined) {
+  const grandParent = parent && parent[ParentSymbol]
+  const grandParentList: Array<TItem> = grandParent?.[props.itemsKey] || computedItems.value
+  const nextParent = parent && grandParentList[parent[IndexSymbol] + 1]
+
+  if (nextParent) {
+    updateModelValue(nextParent)
+    return
   }
-  return false
-}
 
-function sendClose (parentValue: TModelValue): boolean {
-  if (branches.value) {
-    if (Array.isArray(branches.value)) {
-      for (const branch of branches.value) {
-        const result = branch.close(parentValue)
-        if (result) {
-          return result
-        }
-      }
-    } else {
-      return branches.value.close(parentValue)
-    }
+  if (grandParent) {
+    setRecursiveGrandParentNext(grandParent)
   }
-  return false
 }
 
-let current = computed(() => props.modelValue && {
-  parent: findParent(props.options, props.modelValue),
-  self: props.modelValue
-})
-
-function getChildIndex (children: Array<TModelValue>) {
-  return children.findIndex(_ => _ === current.value.self || _.value === current.value.self)
-}
+let prevent = false
 
 const keydownActions = {
   ['ArrowDown'] () {
-    if (!select.value.open) {
-      return select.value.open = true
+    if (prevent) {
+      return
     }
-    if (!current.value || !current.value.parent) {
-      return updateModelValue(props.options[0], false)
+    prevent = true
+    setTimeout(() => prevent = false)
+    if (openIfClosed()) {
+      return
     }
-    const children = childrenFromParent(current.value.parent)
-    const index = getChildIndex(children)
-    if (children[index + 1]) {
-      updateModelValue(children[index + 1], false)
+    if (!currentItem.value) {
+      if (computedItems.value?.length) {
+        updateModelValue(computedItems.value.at(0))
+      }
+      return
     }
+    if (currentItem.value[props.itemsKey]?.length && currentItem.value[InstanceSymbol]?.collapsed === false) {
+      updateModelValue(currentItem.value[props.itemsKey][0])
+      return
+    }
+
+    const parent = currentItem.value[ParentSymbol]
+    const parentList: Array<TItem> = parent ? parent[props.itemsKey] : computedItems.value
+    const nextItem: TItem | undefined = parentList[currentItem.value[IndexSymbol] + 1]
+
+    if (nextItem) {
+      updateModelValue(nextItem)
+      return
+    }
+
+    setRecursiveGrandParentNext(parent)
   },
   ['ArrowUp'] () {
-    if (!select.value.open) {
-      return select.value.open = true
+    if (openIfClosed()) {
+      return
     }
-    if (!current.value || !current.value.parent) {
-      return updateModelValue(props.options.at(-1), false)
+    if (!currentItem.value) {
+      if (computedItems.value?.length) {
+        updateModelValue(computedItems.value.at(-1))
+      }
+      return
     }
-    const children = childrenFromParent(current.value.parent)
-    const index = getChildIndex(children)
-    if (children[index - 1]) {
-      updateModelValue(children[index - 1], false)
+
+    const parent = currentItem.value[ParentSymbol]
+    const parentList: Array<TItem> = parent ? parent[props.itemsKey] : computedItems.value
+    const prevItem: TItem | undefined = parentList[currentItem.value[IndexSymbol] - 1]
+
+    if (prevItem) {
+      if (prevItem[props.itemsKey]?.length && prevItem[InstanceSymbol]?.collapsed === false) {
+        updateModelValue(prevItem[props.itemsKey].at(-1))
+        return
+      }
+      updateModelValue(prevItem)
+      return
+    }
+
+    if (currentItem.value[IndexSymbol] === 0 && parent) {
+      updateModelValue(parent)
     }
   },
   ['Space'] () {
-    if (!select.value.open) {
-      return select.value.open = true
+    if (openIfClosed()) {
+      return
     }
-    if (!current.value || !current.value.parent) {
-      return updateModelValue(props.options[0], false)
+    if (!currentItem.value) {
+      if (computedItems.value?.length) {
+        updateModelValue(computedItems.value.at(0))
+      }
+      return
     }
-    sendToggle()
+    const instance = currentItem.value[InstanceSymbol]
+
+    if (instance && typeof instance.collapsed === 'boolean') {
+      instance.collapsed = !instance.collapsed
+    }
   },
   ['ArrowRight'] () {
-    if (!select.value.open) {
-      select.value.open = true
+    if (openIfClosed()) {
+      return
     }
-    if (!current.value || !current.value.parent) {
-      return updateModelValue(props.options[0], false)
+    if (!currentItem.value) {
+      if (computedItems.value?.length) {
+        updateModelValue(computedItems.value.at(0))
+      }
+      return
     }
-    sendToggle(true)
+
+    const instance = currentItem.value[InstanceSymbol]
+
+    if (instance && typeof instance.collapsed === 'boolean') {
+      if (instance.collapsed === true) {
+        instance.collapsed = false
+        return
+      }
+      if (currentItem.value[props.itemsKey]?.length) {
+        updateModelValue(currentItem.value[props.itemsKey][0])
+      }
+    }
   },
   ['ArrowLeft'] () {
-    if (!select.value.open) {
-      return select.value.open = true
+    if (openIfClosed()) {
+      return
     }
-    if (!current.value || !current.value.parent) {
-      return updateModelValue(props.options[0], false)
-    }
-    if (current.value.self) {
-      const result = sendClose(current.value.self)
-      if (result && current.value.parent?.type === 'branch') {
-        updateModelValue(current.value.parent, false)
+    if (!currentItem.value) {
+      if (computedItems.value?.length) {
+        updateModelValue(computedItems.value.at(0))
       }
+      return
+    }
+
+    const instance = currentItem.value[InstanceSymbol]
+
+    if (instance && instance.collapsed === false) {
+      instance.collapsed = true
+      return
+    }
+
+    if (currentItem.value[ParentSymbol]) {
+      updateModelValue(currentItem.value[ParentSymbol])
     }
   }
 }
 
-function updateModelValue (value: TModelValue, close = true): void {
-  if (close) {
-    select.value?.close()
+function updateModelValueThenClose (value: Props['modelValue']): void {
+  updateModelValue(value)
+  select.value?.close()
+}
+
+function updateModelValue (value: Props['modelValue']): void {
+  if (value[InstanceSymbol] && value[InstanceSymbol].itemElement) {
+    value[InstanceSymbol].itemElement?.scrollIntoView({ block: 'center' })
   }
-  emits('update:modelValue', value.type === 'branch' ? value.value : value)
+  if (props.directoriesDisabled && value[props.itemsKey]) {
+    return
+  }
+  emits('update:modelValue', value[props.valueKey] || value)
 }
 </script>
 
 <style lang="scss">
-.ui-tree-select-node,
-.ui-tree-select-branch__content {
-  padding: 8px 8px;
-  cursor: pointer;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  max-width: 100%;
-  overflow: clip;
-  border-radius: 4px;
-  transition: background-color var(--transition-fast);
-  scrollbar-width: none;
-
-  &:hover {
-    background-color: var(--surface-c);
-    overflow-x: scroll;
-    text-overflow: unset;
+.ui-tree-select {
+  .ui-select__list {
+    padding: 4px;
   }
-  
-  &::-webkit-scrollbar {
-    display: none;
-  }
-
-  &_selected {
-    background-color: var(--primary-color);
-    color: var(--primary-color-text);
-
-    .ui-button {
-      color: var(--primary-color-text);
-    }
-  }
-
-  &_selected:hover {
-    background-color: var(--primary-color-hover);
-  }
-}
-
-.ui-tree-select .ui-select__list {
-  padding-inline: 4px;
-}
-
-.ui-tree-select-branch__content {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.ui-tree-select-branch__toggle {
-  padding: 4px;
-  margin: -6px -4px;
-  background-clip: content-box;
-  border-radius: 8px;
-
-  svg {
-    transition: var(--transition-default);
-  }
-
-  &_collapsed svg {
-    rotate: -90deg;
-  }
-}
-
-.ui-tree-select-branch .ui-tree-select-branch {
-  padding-left: 12px;
-}
-
-.ui-tree-select-branch .ui-tree-select-node {
-  margin-left: 32px;
 }
 </style>

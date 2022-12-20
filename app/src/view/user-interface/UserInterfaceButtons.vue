@@ -178,7 +178,7 @@
             <ui-icon-button
               :appearance="appearance"
               :seriousness="seriousness"
-              :icon="icon"
+              :icon="icon === randomText ? random() : icon"
               :size="_sizes[size]"
               :disabled="disabled"
             >
@@ -228,6 +228,7 @@
   setup
   lang="ts"
 >
+import defaultIcons from '@/assets/icon.svg?raw'
 import UiTableAccordion from '@/components/ui/table/UiTableAccordion.vue'
 import UiTableCellDiagonal from '@/components/ui/table/UiTableCellDiagonal.vue'
 import UiButton from '@/components/ui/UiButton.vue'
@@ -244,8 +245,13 @@ const disabled = ref<boolean>(false)
 const progress = ref<undefined | number>(undefined)
 const size = ref<'small' | 'large' | 'default'>('default')
 const sizes = ['small', 'large', 'default']
-const icons = ['erase', 'blob', 'select-arrow', 'user', 'new-user']
+const _icons = defaultIcons.match(/id="([a-z]|-|[0-9])*"/gm)?.map(_ => _.slice(4, -1)) as Array<string>
+const randomText = 'random()'
+const icons = [randomText, ..._icons]
 const icon = ref<(typeof icons)[number]>(icons[0])
+function random (): string {
+  return _icons[Math.floor(Math.random() * _icons.length)]
+}
 const _sizes = {
   small: 'small',
   large: 'large',

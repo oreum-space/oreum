@@ -1,12 +1,10 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "types": ["vite/client"],
     "useDefineForClassFields": true,
     "module": "ESNext",
     "moduleResolution": "Node",
     "strict": true,
-    "jsx": "preserve",
     "importHelpers": true,
     "sourceMap": true,
     "noImplicitAny": true,
@@ -25,8 +23,9 @@
         "./src/*"
       ]
     },
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "types": ["vite/client"]
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.vue", "global.d.ts"],
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.vue", "./vite-env.d.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

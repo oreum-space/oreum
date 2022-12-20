@@ -36,6 +36,7 @@
     ]
   },
   "globals": {
-    "__VITE_BUILD_TIMESTAMP__": "readonly"
+    "__VITE_BUILD_TIMESTAMP__": "readonly",
+    "RefAny": "readonly"
   }
 }

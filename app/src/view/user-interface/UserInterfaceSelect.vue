@@ -71,9 +71,15 @@
       code
     />
     <div class="d-flex g2">
+      <ui-tree-select-old
+        v-model="treeSelectValue"
+        label="Tree Select"
+        :options="treeSelectOptions"
+      />
       <ui-tree-select
         v-model="treeSelectValue"
         label="Tree Select"
+        items-key="children"
         :options="treeSelectOptions"
       />
       <ui-icon-button
@@ -91,6 +97,16 @@
     <ui-input-color
       model-value="#99999980"
     />
+    <div>
+      <ui-icon icon="folder" />
+      <ui-icon icon="folder-empty" />
+      <ui-icon icon="folder-transparent" />
+    </div>
+    <div style="color: var(--primary-color)">
+      <ui-icon icon="folder" />
+      <ui-icon icon="folder-empty" />
+      <ui-icon icon="folder-transparent" />
+    </div>
   </ui-card>
 </template>
 
@@ -101,8 +117,10 @@
 import UiInputColor from '@/components/ui/input/color/UiInputColor.vue'
 import UiInputText from '@/components/ui/input/UiInputText.vue'
 import UiInputTextarea from '@/components/ui/input/UiInputTextarea.vue'
+import UiTreeSelectOld from '@/components/ui/tree-select/old/UiTreeSelectOld.vue'
 import UiTreeSelect from '@/components/ui/tree-select/UiTreeSelect.vue'
 import UiCard from '@/components/ui/UiCard.vue'
+import UiIcon from '@/components/ui/UiIcon.vue'
 import UiIconButton from '@/components/ui/UiIconButton.vue'
 import UiSelect from '@/components/ui/UiSelect.vue'
 import { Ref, ref } from 'vue'

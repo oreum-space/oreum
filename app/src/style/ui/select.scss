@@ -115,6 +115,7 @@
     clip-path: polygon(-10px calc(100% + 10px), calc(100% + 10px) calc(100% + 10px), calc(100% + 10px) -10px, -10px -10px);
 
     &[data-popper-placement=bottom] {
+      border-radius: 0 0 4px 4px;
       clip-path: polygon(-10px -10px, calc(100% + 10px) -10px, calc(100% + 10px) calc(100% + 10px), -10px calc(100% + 10px));
     }
   }

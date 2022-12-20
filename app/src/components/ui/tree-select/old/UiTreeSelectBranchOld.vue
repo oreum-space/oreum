@@ -20,7 +20,7 @@
           size="small"
           @click.stop="toggle"
         >
-          <ui-icon icon="select-arrow" />
+          <ui-icon icon="collapse-arrow" />
         </ui-button>
         <span>
           {{ option.value }}
@@ -35,7 +35,7 @@
         v-for="child of option.children"
         :key="child"
       >
-        <ui-tree-select-branch
+        <ui-tree-select-branch-old
           v-if="child.type === 'branch'"
           ref="branches"
           :option="child"
@@ -53,8 +53,8 @@
               name="node"
             />
           </template>
-        </ui-tree-select-branch>
-        <ui-tree-select-node
+        </ui-tree-select-branch-old>
+        <ui-tree-select-node-old
           v-else
           :option="child"
           :selected="selected"
@@ -63,7 +63,7 @@
           <template v-if="$slots.node">
             <slot name="node" />
           </template>
-        </ui-tree-select-node>
+        </ui-tree-select-node-old>
       </template>
     </ui-accordion>
   </div>
@@ -73,8 +73,8 @@
   setup
   lang="ts"
 >
-import UiTreeSelectBranch from '@/components/ui/tree-select/UiTreeSelectBranch.vue'
-import UiTreeSelectNode from '@/components/ui/tree-select/UiTreeSelectNode.vue'
+import UiTreeSelectBranchOld from '@/components/ui/tree-select/old/UiTreeSelectBranchOld.vue'
+import UiTreeSelectNodeOld from '@/components/ui/tree-select/old/UiTreeSelectNodeOld.vue'
 import UiAccordion from '@/components/ui/UiAccordion.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiIcon from '@/components/ui/UiIcon.vue'
@@ -105,7 +105,7 @@ function selectOption (option: TOption, close = true): void {
   emits('select-option', option, close)
 }
 
-const branches = ref<typeof UiTreeSelectBranch>()
+const branches = ref<typeof UiTreeSelectBranchOld>()
 
 function sendOpen (rightArrow = false): boolean {
   if (branches.value) {
@@ -167,7 +167,3 @@ defineExpose({
   close
 })
 </script>
-
-<style lang="scss">
-
-</style>
