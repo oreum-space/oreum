@@ -15,34 +15,44 @@
         class="ui-select__list"
         @pointerdown.prevent
       >
-        <slot
-          name="list"
-        />
-        <template v-if="options.length && !$slots.list">
-          <div
-            v-for="option of options"
-            :key="option"
-            role="listitem"
-            class="ui-select__option"
-            :class="{ 'ui-select__option_selected': option === modelValue }"
-            @click="updateModelValue(option); close()"
-          >
-            <slot
-              name="option"
-              :option="option"
+        <div
+          ref="mask"
+          class="ui-select__mask"
+          :class="{
+            'ui-select__mask_scroll-top': maskScrollTop,
+            'ui-select__mask_scroll-bottom': maskScrollBottom
+          }"
+          @scroll="maskScroll"
+        >
+          <slot
+            name="list"
+          />
+          <template v-if="options.length && !$slots.list">
+            <div
+              v-for="option of options"
+              :key="option"
+              role="listitem"
+              class="ui-select__option"
+              :class="{ 'ui-select__option_selected': option === modelValue }"
+              @click="updateModelValue(option); close()"
             >
-              {{ option }}
+              <slot
+                name="option"
+                :option="option"
+              >
+                {{ option }}
+              </slot>
+            </div>
+          </template>
+          <div
+            v-if="options.length === 0"
+            class="ui-select__no-option"
+            @click="close()"
+          >
+            <slot name="no-options">
+              No options
             </slot>
           </div>
-        </template>
-        <div
-          v-if="options.length === 0"
-          class="ui-select__no-option"
-          @click="close()"
-        >
-          <slot name="no-options">
-            No options
-          </slot>
         </div>
       </div>
     </transition>
@@ -180,7 +190,10 @@ function pointerdownHandler (event: PointerEvent) {
   }
 }
 
-const resizeObserver = new ResizeObserver(() => popper.forceUpdate())
+const resizeObserver = new ResizeObserver(() => {
+  popper.forceUpdate()
+  maskScroll()
+})
 
 watch(open, (value) => {
   if (value) {
@@ -199,7 +212,7 @@ function buttonClick () {
 
 function focusout () {
   setTimeout(function () {
-    if (document.activeElement && !select.value.contains(document.activeElement)) {
+    if (document.activeElement && !select.value?.contains(document.activeElement)) {
       close()
     }
   })
@@ -209,6 +222,17 @@ function close () {
   open.value = false
 }
 
+const maskScrollTop = ref<boolean>(false)
+const maskScrollBottom = ref<boolean>(false)
+
+const mask = ref<HTMLElement>()
+
+function maskScroll (): void {
+  if (mask.value) {
+    maskScrollTop.value = mask.value.scrollTop > 4
+    maskScrollBottom.value = mask.value.scrollTop + mask.value.clientHeight <= mask.value.scrollHeight - 4
+  }
+}
 
 function updateModelValue (value: TModelValue): void {
   emits('update:modelValue', value)

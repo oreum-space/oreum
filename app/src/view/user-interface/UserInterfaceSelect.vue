@@ -1,6 +1,8 @@
 <template>
   <ui-card>
-    <ui-input-text />
+    <h1>
+      Select
+    </h1>
     <div class="d-flex g2">
       <ui-select
         v-model="value"
@@ -64,12 +66,6 @@
       label="Select disabled"
       disabled
     />
-    <ui-input-textarea
-      v-model="text"
-      class="dimensional"
-      label="Response body"
-      code
-    />
     <div class="d-flex g2">
       <ui-tree-select
         v-model="treeSelectValue"
@@ -92,16 +88,6 @@
     <ui-input-color
       model-value="#99999980"
     />
-    <div>
-      <ui-icon icon="folder" />
-      <ui-icon icon="folder-empty" />
-      <ui-icon icon="folder-transparent" />
-    </div>
-    <div style="color: var(--primary-color)">
-      <ui-icon icon="folder" />
-      <ui-icon icon="folder-empty" />
-      <ui-icon icon="folder-transparent" />
-    </div>
   </ui-card>
 </template>
 
@@ -183,91 +169,4 @@ const treeSelectOptions = [
   }
 ]
 const treeSelectValue = ref<Ref['value']>(undefined)
-const text = ref<string>(`.dimensional {
-  scale: 2;
-  margin-block: 120px;
-  max-width: 50%;
-  left: 50%;
-  translate: -50%;
-  rotate: 1 1 0.1 15deg;
-  transition: rotate var(--transition-cubic-slow);
-
-  &:hover {
-    rotate: 1 1 0 10deg;
-  }
-
-  &:focus,
-  &:focus-within {
-    rotate: 1 1 0 30deg;
-  }
-}`)
 </script>
-
-<style lang="scss">
-.dimensional {
-  scale: 1.75;
-  margin-block: 120px;
-  max-width: 60%;
-  left: 50%;
-  translate: -50% 0 -100px;
-  transform: rotate3d(0.5, 1, 0, 20deg) scale3d(0.66, 0.66, 0.66);
-  transition: transform var(--transition-cubic-slow);
-  transform-style: preserve-3d;
-  perspective: 2400px;
-
-  &::after,
-  &::before {
-    position: absolute;
-    left: -100%;
-    top: 0;
-    content: ' ';
-    width: 50%;
-    height: 100%;
-    transform: rotateY(-90deg) translateZ(-180px);
-    --border-color: var(--surface-border-a);
-    // border: 2px solid var(--border-color);
-    box-shadow: inset 0 0 2px 1px var(--border-color);
-  }
-
-  &:focus-within::after,
-  &:focus-within::before {
-    --border-color: var(--text-color-secondary);
-  }
-
-  &::after {
-    width: 100%;
-    height: 120px;
-    top: 100%;
-    transform: rotateX(-90deg) translateX(240px) translateZ(-60px);
-  }
-
-  .ui-input-textarea__counters {
-    transform: translateZ(61px);
-    transform-style: preserve-3d;
-  }
-
-  .ui-input-textarea__counter {
-
-    transform-style: preserve-3d;
-    transform: translateZ(120px);
-  }
-
-  .ui-input-label {
-    transform: translateZ(75px);
-  }
-
-  textarea {
-    transform: translateZ(60px);
-    background: transparent;
-  }
-
-  &:hover {
-    transform: rotate3d(0.5, 1, 0, 12.5deg) scale3d(0.88, 0.88, 0.88);
-  }
-
-  &:focus,
-  &:focus-within {
-    transform: rotate3d(0.5, 1, 0, 5deg);
-  }
-}
-</style>

@@ -1,5 +1,8 @@
 <template>
   <ui-card>
+    <h1>
+      Dialog
+    </h1>
     <ui-dialog
       name="ui-dialog"
     />

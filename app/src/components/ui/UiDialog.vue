@@ -237,6 +237,7 @@ defineExpose({
     padding: 8px 8px 8px 16px;
     justify-content: space-between;
     user-select: none;
+    touch-action: none;
 
     * {
       user-select: text;

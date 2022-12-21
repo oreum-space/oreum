@@ -38,29 +38,34 @@ const routes: Array<RouteRecordRaw> = [
     },
     children: [
       {
-        name: 'UserInterfaceDefault',
+        name: 'UI Default',
         path: '',
         component: () => import('@/view/user-interface/UserInterfaceDefault.vue')
       },
       {
-        name: 'UserInterfaceButtons',
+        name: 'UI Buttons',
         path: '/user-interface/buttons',
         component: () => import('@/view/user-interface/UserInterfaceButtons.vue')
       },
       {
-        name: 'UserInterfaceSwitch',
+        name: 'UI Switches',
         path: '/user-interface/switches',
         component: () => import('@/view/user-interface/UserInterfaceSwitches.vue')
       },
       {
-        name: 'UserInterfaceSelect',
+        name: 'UI Select',
         path: '/user-interface/select',
         component: () => import('@/view/user-interface/UserInterfaceSelect.vue')
       },
       {
-        name: 'UserInterfaceDialog',
+        name: 'UI Dialog',
         path: '/user-interface/dialog',
         component: () => import('@/view/user-interface/UserInterfaceDialog.vue')
+      },
+      {
+        name: 'UI Inputs',
+        path: '/user-interface/inputs',
+        component: () => import('@/view/user-interface/UserInterfaceInputs.vue')
       }
     ]
   },

@@ -49,12 +49,14 @@
     }
   }
 
+  &__mask,
   &__value,
   &__list,
   &__option {
     scrollbar-width: none;
   }
 
+  &__mask::-webkit-scrollbar,
   &__value::-webkit-scrollbar,
   &__list::-webkit-scrollbar,
   &__option::-webkit-scrollbar {
@@ -109,17 +111,39 @@
     background-color: var(--surface-overlay);
     box-shadow: var(--surface-overlay-shadow);
     z-index: 1;
-    overflow-x: hidden;
-    overflow-y: auto;
     height: auto;
     max-height: calc(max(80px, min(calc(var(--fvh) / 2 - 120px), 368px)));
     border-radius: 4px 4px 0 0;
-    padding-block: 4px;
     clip-path: polygon(-10px calc(100% + 10px), calc(100% + 10px) calc(100% + 10px), calc(100% + 10px) -10px, -10px -10px);
 
     &[data-popper-placement=bottom] {
       border-radius: 0 0 4px 4px;
       clip-path: polygon(-10px -10px, calc(100% + 10px) -10px, calc(100% + 10px) calc(100% + 10px), -10px calc(100% + 10px));
+    }
+  }
+
+  &__mask {
+    width: 100%;
+    height: 100%;
+    max-height: calc(max(80px, min(calc(var(--fvh) / 2 - 120px), 368px)));
+    padding-block: 4px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    transition: var(--transition-default);
+    --mask: linear-gradient(transparent 0, black 4px, black calc(100% - 4px), transparent 100%);
+    -webkit-mask-image: var(--mask);
+    mask-image: var(--mask);
+
+    &_scroll-top {;
+      --mask: linear-gradient(transparent 0, black 32px, black calc(100% - 4px), transparent 100%);
+    }
+
+    &_scroll-bottom {;
+      --mask: linear-gradient(transparent 0, black 4px, black calc(100% - 32px), transparent 100%);
+    }
+
+    &_scroll-top:is(&_scroll-bottom) {;
+      --mask: linear-gradient(transparent 0, black 32px, black calc(100% - 32px), transparent 100%);
     }
   }
 

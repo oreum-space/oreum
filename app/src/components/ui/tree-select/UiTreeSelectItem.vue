@@ -28,6 +28,15 @@
     />
     <div class="ui-tree-select-item__content">
       <slot
+        v-if="!$slots.nested"
+        :item="item"
+        :directory="isDirectory"
+      >
+        {{ item[valueKey] }}
+      </slot>
+      <slot
+        v-else
+        name="nested"
         :item="item"
         :directory="isDirectory"
       >
@@ -50,10 +59,13 @@
         :update-model-value="updateModelValue"
         :parent-collapsed="collapsed"
       >
-        <template v-if="$slots.default">
+        <template
+          v-if="$slots.default"
+          #nested="{ item: item0, directory }"
+        >
           <slot
-            :item="item"
-            :directory="isDirectory"
+            :item="item0"
+            :directory="directory"
           />
         </template>
       </ui-tree-select-item>
@@ -139,7 +151,7 @@ defineExpose({
     transition: rotate var(--transition-default);
   }
 
-  &_collapsed svg {
+  &_collapsed .ui-icon-button:first-child  svg{
     rotate: -90deg;
   }
 

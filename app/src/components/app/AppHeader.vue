@@ -13,22 +13,26 @@
       <app-logo />
     </router-link>
     <div class="app-header__tabs">
-      <router-link to="/user-interface">
+      <ui-select
+        model-value="Menu"
+        @update:model-value="$router.push($event.to)"
+        :options="options"
+      >
+        <template #option="{ option }">
+          {{ option['name'] }}
+        </template>
+      </ui-select>
+      <router-link
+        v-for="option of options"
+        :key="option.name"
+        :to="option.to"
+      >
         <ui-button
           size="large"
-          seriousness="warning"
+          seriousness="secondary"
           appearance="text"
         >
-          UI
-        </ui-button>
-      </router-link>
-      <router-link to="/other/lucky-wheel">
-        <ui-button
-          size="large"
-          seriousness="success"
-          appearance="text"
-        >
-          Wheel
+          {{ option.name }}
         </ui-button>
       </router-link>
     </div>
@@ -46,6 +50,7 @@ import AppAuth from '@/components/app/AppAuth.vue'
 import AppLogo from '@/components/app/AppLogo.vue'
 import AppProfile from '@/components/app/AppProfile.vue'
 import UiButton from '@/components/ui/UiButton.vue'
+import UiSelect from '@/components/ui/UiSelect.vue'
 import useProfile from '@/store/profile'
 import { onMounted } from 'vue'
 
@@ -54,6 +59,17 @@ const emits = defineEmits<{
   (e: 'mounted'): void
 }>()
 onMounted(() => emits('mounted'))
+
+const options = [
+  {
+    name: 'UI',
+    to: '/user-interface'
+  },
+  {
+    name: 'Wheel',
+    to: '/other/lucky-wheel'
+  }
+]
 </script>
 
 <style lang="scss">
@@ -91,6 +107,10 @@ onMounted(() => emits('mounted'))
     height: var(--app-header-height);
     padding-inline: 12px;
     gap: 8px;
+
+    .ui-select {
+      display: none;
+    }
   }
 
   &__space {
@@ -128,6 +148,20 @@ onMounted(() => emits('mounted'))
         width: 144px;
         height: 36px;
         scale: 75%;
+      }
+    }
+
+    &__tabs {
+      position: absolute;
+      left: 0;
+
+      a {
+        display: none;
+      }
+
+      .ui-select {
+        display: unset;
+        --width: 96px;
       }
     }
   }

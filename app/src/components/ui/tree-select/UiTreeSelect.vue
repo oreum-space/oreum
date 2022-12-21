@@ -13,16 +13,16 @@
     >
       <slot
         name="selected"
-        :selected="currentItem"
+        :selected="modelValue"
         :close="close"
       />
     </template>
     <template #list>
       <ui-tree-select-item
-        v-for="item of computedItems"
-        :key="item[valueKey]"
+        v-for="computedItem of computedItems"
+        :key="computedItem[valueKey]"
         ref="items"
-        :item="item"
+        :item="computedItem"
         :items-key="itemsKey"
         :value-key="valueKey"
         :model-value="modelValue"
@@ -31,11 +31,11 @@
       >
         <template
           v-if="$slots.item"
-          #default="{ item: item0, directory }"
+          #default="{ item, directory }"
         >
           <slot
             name="item"
-            :item="item0"
+            :item="item"
             :directory="directory"
           />
         </template>
@@ -282,6 +282,10 @@ const keydownActions = {
 }
 
 function updateModelValueThenClose (value: Props['modelValue']): void {
+  if (props.directoriesDisabled && value[props.itemsKey]) {
+    value[InstanceSymbol].collapsed = !value[InstanceSymbol].collapsed
+    return
+  }
   updateModelValue(value)
   select.value?.close()
 }
@@ -290,16 +294,13 @@ function updateModelValue (value: Props['modelValue']): void {
   if (value[InstanceSymbol] && value[InstanceSymbol].itemElement) {
     value[InstanceSymbol].itemElement?.scrollIntoView({ block: 'center' })
   }
-  if (props.directoriesDisabled && value[props.itemsKey]) {
-    return
-  }
   emits('update:modelValue', value[props.valueKey] || value)
 }
 </script>
 
 <style lang="scss">
 .ui-tree-select {
-  .ui-select__list {
+  .ui-select__mask {
     padding: 4px;
   }
 }

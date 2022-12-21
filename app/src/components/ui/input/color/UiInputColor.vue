@@ -3,20 +3,20 @@
     ref="wrapper"
     class="ui-input-color"
   >
-    <div
+    <button
       ref="button"
       role="button"
       tabindex="0"
       class="ui-input-color__button ui-button"
       :style="{
-        backgroundColor: valueHEX.value,
+        backgroundColor: modelValue ? (typeof modelValue === 'string' ? modelValue : `#${modelValue}`) : valueHEX.value,
         color: contrast
       }"
       @click="visible = !visible"
       @keydown.enter.space="visible = !visible"
     >
-      {{ valueHEX.value }}
-    </div>
+      {{ modelValue || valueHEX.value }}
+    </button>
     <div
       ref="popover"
       class="ui-input-color__popover"
@@ -36,8 +36,8 @@
           class="ui-input-color__pointer"
           :style="{
             backgroundColor: valueHEX.value,
-            left: `${(colorModel === 'HSL' ? valueHSL.s : valueHSV.s) * 2.55}px`,
-            top: `calc(255px - ${(colorModel === 'HSL' ? valueHSL.l : valueHSV.v) * 2.55}px)`
+            left: `${(colorModel === 'HSL' ? valueHSL.s : valueHSV.s)}%`,
+            bottom: `${(colorModel === 'HSL' ? valueHSL.l : valueHSV.v)}%`
           }"
         />
       </div>
@@ -49,7 +49,7 @@
         >
           <template #option="{ option }">
             <div class="ui-input-color__color-model ui-input-color__color-model_option">
-              <b>{{ option.display }}</b>
+              <b>{{ option['display'] }}</b>
               <small>{{ getValue(option?.value).value }}</small>
             </div>
           </template>
@@ -123,21 +123,20 @@ function updateVisibility (popper: Instance | null, visible: Ref<boolean> | Comp
   }
 }
 
-type ModelValue = string | number
+type TModeValue = string | number
 
 type Props = {
-  modelValue: ModelValue
+  modelValue: TModeValue
   alpha?: true,
   colorModel?: ColorModel
 }
 
 type Emits = {
-  (e: 'update:modelValue', v: ModelValue): void
+  (e: 'update:modelValue', v: TModeValue): void
 }
 
-const
-  props = defineProps<Props>(),
-  emits = defineEmits<Emits>()
+const props = defineProps<Props>()
+const emits = defineEmits<Emits>()
 
 const
   colorModel = ref<ColorModel>(props.colorModel || COLOR_MODELS[0]),
@@ -204,12 +203,13 @@ let rects: DOMRect
 
 function pointerMoveHandle (event: PointerEvent) {
   if (rects) {
-    const
-      isHSV = colorModel.value !== COLOR_MODELS[3],
-      x = Math.max(Math.min(event.clientX - rects.x, 255), 0),
-      y = Math.max(Math.min(event.clientY - rects.y, 255), 0),
-      xx = Math.round(x * 100 / 2.55) / 100,
-      yy = Math.round(10000 - y * 100 / 2.55) / 100
+    const width = rects.width - 1
+    const height = rects.height - 1
+    const isHSV = colorModel.value !== COLOR_MODELS[3]
+    const x = Math.max(Math.min(event.clientX - rects.x, width), 0)
+    const y = Math.max(Math.min(event.clientY - rects.y, height), 0)
+    const xx = Math.round(x * 100 / (width / 100)) / 100
+    const yy = Math.round(10000 - y * 100 / (height / 100)) / 100
 
     setValue(isHSV ? {
       model: COLOR_MODELS[4],
@@ -228,6 +228,7 @@ function pointerMoveHandle (event: PointerEvent) {
 
 function pointerUpHandler (event: PointerEvent) {
   removeEventListener('pointermove', pointerMoveHandle)
+  addEventListener('click', (event) => event.stopImmediatePropagation(), { capture: true, once: true })
   pointerMoveHandle(event)
 }
 
@@ -241,7 +242,7 @@ function boxPointerDown (event: PointerEvent) {
   }
 }
 
-function setValue (v: ModelValue | ColorValueRaw): void {
+function setValue (v: TModeValue | ColorValueRaw): void {
   let rgb: ColorValueRGBLike
 
   if (typeof v !== 'object') {
@@ -330,7 +331,12 @@ let popper: Instance | null = null
 
 function pointerdownHandler (event: PointerEvent) {
   if (visible.value === true && wrapper.value && !event.composedPath().includes(wrapper.value)) {
+    event.preventDefault()
+    event.stopImmediatePropagation()
     visible.value = false
+    addEventListener('click', (event) => {
+      event.stopImmediatePropagation()
+    }, { once: true , capture: true })
   }
 }
 
@@ -431,6 +437,7 @@ function setColorModel (v: Ref['value']) {
     outline: 2px solid currentcolor;
     outline-offset: -2px;
     padding-block: 9px;
+    text-transform: capitalize;
 
     &:not(:hover):not(:focus) {
       outline-color: transparent;
@@ -447,6 +454,7 @@ function setColorModel (v: Ref['value']) {
     z-index: 4;
     user-select: none;
     -webkit-user-drag: none;
+    touch-action: none;
 
     @media (orientation: portrait), (min-height: 768px) {
       flex-flow: column;
@@ -460,6 +468,11 @@ function setColorModel (v: Ref['value']) {
     .ui-input {
       --width: 256px !important;
       width: 256px;
+
+      @media (max-width: 512px) {
+        --width: 196px !important;
+        width: 196px;
+      }
     }
 
     &-arrow {
@@ -476,6 +489,13 @@ function setColorModel (v: Ref['value']) {
     width: 256px;
     height: 256px;
     background: linear-gradient(0, #000000FF, #00000000), linear-gradient(90deg, #FFFFFFFF, #FFFFFF00) currentcolor;
+    user-select: none;
+    -webkit-user-drag: none;
+
+    @media (max-width: 512px), (max-height: 512px) {
+      width: 196px;
+      height: 196px;
+    }
 
     &_hsl {
       background: linear-gradient(0deg, #000000FF, #00000000 50%, #FFFFFF00 50%, #FFFFFFFF), linear-gradient(90deg, #808080FF, currentcolor);
@@ -488,12 +508,12 @@ function setColorModel (v: Ref['value']) {
     height: 11px;
     border-radius: 5px;
     border: 1px solid var(--contrast);
-    transform: translate(-5px, -5px);
+    transform: translate(-5px, 5px);
     transition: border-color ease-in-out 0.25s;
     background-color: transparent;
     z-index: 1;
     left: 0;
-    top: 0;
+    bottom: 100%;
 
     &::after {
       content: ' ';

@@ -3,8 +3,17 @@
     <div class="other-lucky-wheel__wheel">
       <div class="other-lucky-wheel__arrow" />
       <div
+        class="other-lucky-wheel__winner"
+        :class="{ 'other-lucky-wheel__winner_hidden': rotating }"
+        :style="{
+          backgroundColor: winner?.item?.color
+        }"
+      >
+        {{ winner?.item.name || '' }}
+      </div>
+      <div
         class="other-lucky-wheel__content"
-        :style="{ rotate: `${angle}rad` }"
+        :style="{ rotate: `${angle - 0.7853981633974483}rad` }"
       >
         <div class="other-lucky-wheel__shadow" />
         <template v-if="items.length">
@@ -18,6 +27,9 @@
             <h3 class="other-lucky-wheel__item-name">
               {{ item.name }}
             </h3>
+            <div
+              class="other-lucky-wheel__item-border"
+            />
           </div>
         </template>
         <div
@@ -46,6 +58,7 @@
         size="large"
         seriousness="primary"
         appearance="outlined"
+        :disabled="rotating"
         @click="wheel"
       >
         <ui-icon
@@ -62,9 +75,11 @@
     >
       <template #body>
         <ui-tree-select
-          v-model="element"
+          :model-value="element"
+          @update:model-value="selectElement"
           label="Element"
           :options="elements"
+          directories-disabled
         >
           <template #selected="{ selected }">
             <div
@@ -72,21 +87,27 @@
                 width: '16px',
                 height: '16px',
                 borderRadius: '4px',
-                backgroundColor: selected?.value.color || '#888888',
+                backgroundColor: selected?.value.color || '#808080',
                 border: '1px solid var(--surface-border-a)'
               }"
             />
             <span>
-              {{ selected?.value.name || '-' }}
+              {{ selected?.value.name || '' }}
             </span>
             <small>
               <code>
-                {{ selected?.value.value || '-' }}
+                {{ selected?.value.value }}
               </code>
             </small>
           </template>
-          <template #item="{ item }">
+          <template #item="{ item, directory }">
+            <ui-icon
+              class="other-lucky-wheel__folder"
+              v-if="directory"
+              icon="folder-empty"
+            />
             <div
+              v-else
               :style="{
                 width: '16px',
                 height: '16px',
@@ -165,13 +186,15 @@
 >
 import UiInputColor from '@/components/ui/input/color/UiInputColor.vue'
 import UiInputText from '@/components/ui/input/UiInputText.vue'
+import type { TItemRaw } from '@/components/ui/tree-select/ui-tree-select'
 import UiTreeSelect from '@/components/ui/tree-select/UiTreeSelect.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiDialog from '@/components/ui/UiDialog.vue'
 import UiIcon from '@/components/ui/UiIcon.vue'
 import UiSelect from '@/components/ui/UiSelect.vue'
+import localStorageRef from '@/library/localStorageRef'
 import useDialog from '@/store/dialog'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 interface ItemBase {
   name: string,
@@ -186,76 +209,149 @@ interface ItemColor extends ItemBase {
   color: string
 }
 
-type Item = ItemImage | ItemColor
+type Item = ItemImage & ItemColor
 
 const defaultItems = [
   {
+    items: [
+      {
+        value: {
+          name: 'Yes',
+          color: '#689F38'
+        }
+      },
+      {
+        value: {
+          name: 'No',
+          color: '#D32F2F'
+        }
+      },
+      {
+        value: {
+          name: 'One more time!',
+          color: '#D4D4D4'
+        }
+      }
+    ],
+    value: { name: 'Simple' }
+  },
+  {
+    items: [
+      {
+        value: {
+          name: 'Valheim',
+          color: '#00606f'
+        }
+      },
+      {
+        value: {
+          name: 'Overwatch',
+          color: '#ecca01'
+        }
+      },
+      {
+        value: {
+          name: 'Minecraft',
+          color: '#0a601e'
+        }
+      }
+    ],
     value: {
-      name: 'Item 1 Lorem ipsum dolor sit amet.',
-      value: 6,
-      color: 'darkred'
-    }
-  }, {
-    value: {
-      name: 'Item 2 Lorem ipsum dolor sit amet.',
-      value: 3,
-      color: 'darkblue'
-    }
-  }, {
-    value: {
-      name: 'Item 3 Lorem ipsum dolor sit amet.',
-      value: 1,
-      color: 'darkgreen'
+      name: 'Games'
     }
   }
 ]
-
-const custom = {
-  value: {
-    name: 'Custom',
-    value: 1,
-    color: '#888888'
-  }
-}
-
-const elements = computed(() => {
-  return [
-    custom,
-    ...defaultItems
-  ]
-})
 
 const backgrounds = ['Image', 'Color']
 
 const background = ref<string>(backgrounds[1])
 
-const element = ref<unknown>(custom.value)
+const name = localStorageRef<string>('lucky-wheel:name', '')
+const value = localStorageRef<string>('lucky-wheel:value', '1')
+const color = localStorageRef<string>('lucky-wheel:color', '#808080')
+const image = localStorageRef<string>('lucky-wheel:image', '')
 
-const items = ref<Array<Item>>([
-  {
-    name: 'Item 1 Lorem ipsum dolor sit amet.',
-    value: 6,
-    color: 'darkred'
-  }, {
-    name: 'Item 2 Lorem ipsum dolor sit amet.',
-    value: 3,
-    color: 'darkblue'
-  }, {
-    name: 'Item 3 Lorem ipsum dolor sit amet.',
-    value: 1,
-    color: 'darkgreen'
+const computedCustom = computed(() => ({
+  value: {
+    name: name.value,
+    value: value.value,
+    color: color.value,
+    image: image.value
   }
-])
-const name = ref<string>('')
-const value = ref<string>('1')
-const color = ref<string>('#888888')
-const image = ref<string>('')
+}))
 
+const elements = computed(() => {
+  return [
+    ...defaultItems
+  ]
+})
+
+const _element = ref<unknown>(undefined)
+
+watch([name, value, color, image], () => {
+  _element.value = undefined
+})
+
+function selectElement (newElement: TItemRaw) {
+  name.value = newElement.name || ''
+  value.value = newElement.value || '1'
+  color.value = newElement.color || '#808080'
+  image.value = newElement.image || ''
+}
+
+const element = computed({
+  get () {
+    return _element.value || computedCustom.value
+  },
+  set (value) {
+    _element.value = value
+  }
+})
+
+const _defaultItems: Array<Item> = [
+  {
+    name: 'No',
+    value: 1,
+    color: '#D32F2F',
+    image: ''
+  },
+  {
+    name: 'Yes',
+    value: 1,
+    color: '#689F38',
+    image: ''
+  }
+]
+const items = localStorageRef<Array<Item>>('lucky-wheel:items', _defaultItems)
 const totalValue = computed(() => items.value.reduce((a, _) => a + _.value, 0))
-const angle = ref<number>(0)
+const angle = localStorageRef<number>('lucky-wheel:angle', Math.PI / 2)
 const dialog = useDialog()
+const rotating = ref<boolean>(false)
 
-function isItemColor (item: Item): item is ItemColor {
+if (items.value.length === 0) {
+  items.value = _defaultItems
+  angle.value = Math.PI / 2
+}
+
+const winner = computed(() => {
+  if (!items.value?.length) {
+    return undefined
+  }
+  const items_ = items.value.map((item) => {
+    return {
+      rotate: parseFloat(getRotate(item).slice(0, -3)),
+      item
+    }
+  })
+
+  const angle_ = angle.value % (2 * Math.PI)
+
+  let index = items_.findIndex(_ => -_.rotate >= angle_)
+  let result = items_.at(index === -1 ? 0 : index)
+  return result
+})
+
+function isItemColor (item: Item): item is Item {
   return 'color' in item
 }
 
@@ -294,7 +390,7 @@ function getClipPath (item: Item): string {
 function getRotate (item: Item): string {
   const percent = items.value.slice(0, items.value.indexOf(item)).reduce((a, _) => a + _.value, 0) / totalValue.value
 
-  return `${Math.PI * 2 * percent}rad`
+  return `-${Math.PI * 2 * percent}rad`
 }
 
 function getHalf (item: Item): string {
@@ -305,15 +401,30 @@ function getHalf (item: Item): string {
 
 function getItemStyle (item: Item): Record<string, string> {
   return {
-    '--background-color': isItemColor(item) ? item.color : 'gray',
+    '--background-color': isItemColor(item) ? item.color + 'A0' : '#00000080',
     '--clip-path': getClipPath(item),
     '--rotate': getRotate(item),
     '--half': getHalf(item)
   }
 }
 
+function wheel2 () {
+  rotating.value = false
+}
+
+function wheel1 () {
+  if (isNaN(angle.value)) {
+    angle.value = 0
+  }
+  angle.value = angle.value + (Math.random() * Math.PI * 10 + Math.PI * 5 + Math.random() * Math.PI)
+  setTimeout(wheel2, 3000)
+}
+
 function wheel () {
-  angle.value += Math.random() * Math.PI * 10 + Math.PI * 5 + Math.random() * Math.PI
+  if (rotating.value === false) {
+    rotating.value = true
+    setTimeout(wheel1, 300)
+  }
 }
 
 function removeItem (item: Item): void {
@@ -323,11 +434,14 @@ function removeItem (item: Item): void {
 function addItem (): void {
   const _value = +value.value
 
-  items.value.push({
-    name: name.value,
-    value: isNaN(_value) && _value <= 0 ? 1 : _value,
-    color: color.value
-  })
+  items.value = [
+    ...items.value, {
+      name: name.value,
+      value: isNaN(_value) && _value <= 0 ? 1 : _value,
+      color: color.value,
+      image: ''
+    }
+  ]
 }
 
 </script>
@@ -390,7 +504,6 @@ function addItem (): void {
     pointer-events: none;
   }
 
-
   &__content {
     display: flex;
     width: 100%;
@@ -399,7 +512,7 @@ function addItem (): void {
     padding: 50% 0;
     overflow: hidden;
     border-radius: 50%;
-    transition: rotate ease-out 3s;
+    transition: rotate cubic-bezier(0.345, -0.215, 0.000, 1.000) 3250ms;
   }
 
   &__item {
@@ -428,6 +541,27 @@ function addItem (): void {
     transform-origin: -10% 50%;
     rotate: var(--half);
     padding-inline: 10% 2.5%;
+    color: white;
+    text-shadow: 0 0 2px black, 0 0 2px black, 0 0 2px black, 0 0 2px black;
+  }
+
+  &__item-border {
+    position: relative;
+  }
+
+  &__winner {
+    position: absolute;
+    left: 88%;
+    top: 12%;
+    translate: 0 -100%;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: 250ms;
+    z-index: 2;
+
+    &_hidden {
+      opacity: 0;
+    }
   }
 
   &__arrow {
@@ -523,11 +657,26 @@ function addItem (): void {
   }
 }
 
+.other-lucky-wheel__folder {
+  margin-inline: -4px;
+}
+
 @media (max-aspect-ratio: 8 / 10) {
   .other-lucky-wheel {
     &__start,
     &__add {
       translate: 0 calc(100% + 8px);
+    }
+  }
+}
+
+@media (min-aspect-ratio: 4 / 3) and (max-width: 768px) {
+  .other-lucky-wheel {
+    &__start {
+      translate: calc(-100% - 8px) 0;
+    }
+    &__add {
+      translate: calc(100% + 8px) 0;
     }
   }
 }

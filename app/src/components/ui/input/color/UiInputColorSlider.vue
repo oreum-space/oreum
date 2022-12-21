@@ -2,9 +2,9 @@
   <div
     class="ui-color-slider ui-input"
     :style="{
-      width: width ? `${width}px` : '256px',
+      width: width,
       backgroundImage,
-      '--value': `${value}px`,
+      '--value': value,
       '--max': max || 255
     }"
   >
@@ -95,6 +95,7 @@ function inputNumberHandler (event: Event) {
   text-align: end;
   position: relative;
   border: 0 solid transparent;
+  padding-block: 10px;
   clip-path: inset(0 0 0 0);
   box-shadow: 0 0 0 1px var(--surface-border-a-static) inset;
   cursor: pointer;
@@ -114,7 +115,7 @@ function inputNumberHandler (event: Event) {
     box-shadow: inherit;
     transform-origin: center center;
     transform: rotate(45deg);
-    left: calc((var(--value) - 5px) * 1.0075 * (255 / var(--max)));
+    left: calc(100% * (var(--value)) / 255 - 5px);  // calc((var(--value) - 5px) * 1.0075 * (255 / var(--max)));
     z-index: 2;
   }
 
@@ -143,14 +144,16 @@ function inputNumberHandler (event: Event) {
   }
 
   &__slider {
-    opacity: 0;
+    // opacity: 0;
     cursor: pointer;
     position: absolute;
     width: 100%;
     left: 0;
     top: 0;
-    height: 100%;
+    height: 40px;
     z-index: 3;
+    background-color: transparent;
+    opacity: 0.0001;
 
     &:focus {
       cursor: ew-resize;
@@ -158,11 +161,12 @@ function inputNumberHandler (event: Event) {
 
     &::-webkit-slider-runnable-track {
       height: 100%;
+      opacity: 0;
     }
 
     &::-webkit-slider-thumb {
-      height: 100%;
-      max-width: 0;
+      width: 32px;
+      height: 36px;
     }
   }
 

@@ -16,12 +16,20 @@
   lang="ts"
 >
 import useDialog from '@/store/dialog'
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 
 const dialog = useDialog()
 
 const dialogs = computed(() => {
   return dialog.dialogs.filter(_ => _.exposes.shown)
+})
+
+watch(dialogs, (value) => {
+  if (value.length) {
+    document.documentElement.classList.add('prevent-scrolling_dialog')
+  } else {
+    document.documentElement.classList.remove('prevent-scrolling_dialog')
+  }
 })
 
 function hide () {
