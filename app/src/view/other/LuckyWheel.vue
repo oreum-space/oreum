@@ -82,12 +82,12 @@
           <ui-input-text
             label="Name"
             :model-value="currentItem.name"
-            @update:model-value="currentItem.name = $event; items = [...items]"
+            @update:model-value="currentItem && (currentItem.name = $event); items = [...items]"
           />
           <ui-input-text
             label="Value"
             :model-value="`${currentItem.value}` || ''"
-            @update:model-value="currentItem.value = +$event; items = [...items]"
+            @update:model-value="currentItem && (currentItem.value = +$event); items = [...items]"
           />
         </div>
         <div
@@ -97,13 +97,13 @@
           <ui-input-color
             v-if="currentItem.color"
             :model-value="currentItem.color"
-            @update:model-value="currentItem.color = $event; items = [...items]"
+            @update:model-value="currentItem && (currentItem.color = `${$event}`); items = [...items]"
           />
           <ui-input-text
             v-else
             :model-value="currentItem.image"
             label="Image URL"
-            @update:model-value="currentItem.image = $event; items = [...items]"
+            @update:model-value="currentItem && (currentItem.image = $event); items = [...items]"
           />
         </div>
       </template>
@@ -119,7 +119,7 @@
         <ui-button
           seriousness="danger"
           appearance="outlined"
-          @click="dialog.hide(); removeItem(currentItem)"
+          @click="dialog.hide(); currentItem && removeItem(currentItem)"
         >
           Remove
         </ui-button>

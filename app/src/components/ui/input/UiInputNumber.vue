@@ -155,7 +155,7 @@ function onkeydown (event: KeyboardEvent): void {
   }
 }
 
-function oninput (event: InputEvent): void {
+function oninput (event: Event): void {
   if (isFinite(input.value.valueAsNumber)) {
     value.value = input.value.valueAsNumber
     return
