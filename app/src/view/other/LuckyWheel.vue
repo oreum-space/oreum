@@ -3,6 +3,7 @@
     <div class="other-lucky-wheel__wheel">
       <div class="other-lucky-wheel__arrow" />
       <div
+        v-show="false"
         class="other-lucky-wheel__winner"
         :class="{ 'other-lucky-wheel__winner_hidden': rotating }"
         :style="{
