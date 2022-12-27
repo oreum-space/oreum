@@ -3,7 +3,6 @@
     <div class="other-lucky-wheel__wheel">
       <div class="other-lucky-wheel__arrow" />
       <div
-        v-show="false"
         class="other-lucky-wheel__winner"
         :class="{ 'other-lucky-wheel__winner_hidden': rotating }"
         :style="{
@@ -27,12 +26,19 @@
             @click.prevent.right="currentItem = item; dialog.show('lucky-wheel-edit')"
             @click.middle="removeItem(item)"
           >
-            <h3 class="other-lucky-wheel__item-name">
-              {{ item.name }}
-            </h3>
-            <div
-              class="other-lucky-wheel__item-border"
-            />
+            <div class="other-lucky-wheel__item-content">
+              <h3
+                v-if="!item.image.endsWith('hide=true')"
+                class="other-lucky-wheel__item-name"
+              >
+                {{ item.name }}
+              </h3>
+              <div
+                v-if="item.image"
+                class="other-lucky-wheel__item-image"
+              />
+              <div class="other-lucky-wheel__item-border" />
+            </div>
           </div>
         </template>
         <div
@@ -67,7 +73,7 @@
         <ui-icon
           icon="dot"
         />
-        Wheel
+        Spin
       </ui-button>
     </div>
     <ui-dialog
@@ -101,7 +107,7 @@
             @update:model-value="currentItem && (currentItem.color = `${$event}`); items = [...items]"
           />
           <ui-input-text
-            v-else
+            v-if="currentItem.image"
             :model-value="currentItem.image"
             label="Image URL"
             @update:model-value="currentItem && (currentItem.image = $event); items = [...items]"
@@ -300,13 +306,15 @@ const defaultItems = [
       {
         value: {
           name: 'Valheim',
-          color: '#00606f'
+          color: '#00606f',
+          image: 'https://cdn2.steamgriddb.com/file/sgdb-cdn/logo/70e12d315a19ad3e37b2593a58f37459.png?hide=true'
         }
       },
       {
         value: {
           name: 'Overwatch',
-          color: '#ecca01'
+          color: '#ecca01',
+          image: 'https://logolook.net/wp-content/uploads/2021/07/Overwatch-Logo-text.png?hide=true'
         }
       },
       {
@@ -318,7 +326,9 @@ const defaultItems = [
       {
         value: {
           name: 'Red Dead Redemption 2',
-          color: '#C40410'
+          color: '#C40410',
+          image:
+            'https://upload.wikimedia.org/wikipedia/commons/2/22/Red_Dead_Redemption_2_Logo.png?hide=true'
         }
       },
       {
@@ -439,16 +449,19 @@ const winner = computed(() => {
   if (!items.value?.length) {
     return undefined
   }
-  const items_ = items.value.map((item) => {
+  const items_ = items.value.map((item, index, array) => {
+    const nextItem = array[index + 1]
     return {
-      rotate: parseFloat(getRotate(item).slice(0, -3)),
+      name: item.name,
+      startRotate: Math.PI * 2 - -parseFloat(getRotate(item).slice(0, -3)),
+      endRotate: nextItem ? Math.PI * 2 - -parseFloat(getRotate(nextItem).slice(0, -3)) : 0,
       item
     }
   })
 
   const angle_ = angle.value % (2 * Math.PI)
 
-  let index = items_.findIndex(_ => -_.rotate >= angle_)
+  let index = items_.findIndex(_ => _.startRotate >= angle_ && angle_ > _.endRotate)
   return items_.at(index === -1 ? 0 : index)
 })
 
@@ -520,6 +533,7 @@ function getHalf (item: Item): string {
 function getItemStyle (item: Item): Record<string, string> {
   return {
     '--background-color': isItemColor(item) ? item.color + 'A0' : '#00000080',
+    '--background-image': item.image ? `url('${item.image}')` : '',
     '--clip-path': getClipPath(item),
     '--rotate': getRotate(item),
     '--half': getHalf(item)
@@ -557,7 +571,7 @@ function addItem (): void {
       name: name.value,
       value: isNaN(_value) && _value <= 0 ? 1 : _value,
       color: color.value,
-      image: ''
+      image: image.value || ''
     }
   ]
 }
@@ -646,21 +660,36 @@ function addItem (): void {
     background-color: var(--background-color);
     clip-path: var(--clip-path);
   }
+  
+  &__item-content {
+    position: relative;
+    left: 50%;
+    top: 0;
+    height: 100%;
+    width: 50%;
+    transform-origin: center left;
+    rotate: var(--half);
+  }
 
   &__item-name {
-    position: relative;
-    display: block;
+    position: absolute;
     left: 55%;
-    text-align: center;
     top: 50%;
-    width: 45%;
-    max-width: 45%;
-    translate: 0 -50%;
-    transform-origin: -10% 50%;
-    rotate: var(--half);
-    padding-inline: 10% 2.5%;
-    color: white;
-    text-shadow: 0 0 2px black, 0 0 2px black, 0 0 2px black, 0 0 2px black;
+    translate: -50% -50%;
+    max-width: 95%;
+  }
+
+  &__item-image {
+    position: absolute;
+    left: 55%;
+    top: 50%;
+    translate: -50% -50%;
+    width: 80%;
+    height: 50%;
+    background-image: var(--background-image);
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center center;
   }
 
   &__item-border {
