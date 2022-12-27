@@ -677,6 +677,9 @@ function addItem (): void {
     top: 50%;
     translate: -50% -50%;
     max-width: 95%;
+    z-index: 1;
+    color: white;
+    text-shadow: 0 0 2px black, 0 0 2px black, 0 0 2px black, 0 0 2px black;
   }
 
   &__item-image {
