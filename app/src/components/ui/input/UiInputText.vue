@@ -13,8 +13,6 @@
       :style="{ '--width': width }"
       @focus="onfocus"
       @blur="onblur"
-      @mouseenter="onfocus"
-      @mouseleave="onblur"
     >
     <label
       v-if="label"
@@ -38,7 +36,6 @@ type Props = {
   disabled?: boolean,
   maxlength?: string,
   autocomplete?: string,
-  datalist?: Array<string>,
   width?: string | number,
   type?: 'password' | 'email' | 'text'
 }
@@ -47,25 +44,23 @@ const props = defineProps<Props>()
 const emits = defineEmits<{
   (e: 'update:modelValue', value: string): void
 }>()
+const value = computed({
+  get (): string {
+    return props.modelValue || ''
+  },
+  set (value: string) {
+    emits('update:modelValue', value)
+  }
+})
+const _disabled = computed(() => typeof props.modelValue !== 'string' || !!props.disabled)
+const input = ref() as Ref<HTMLInputElement>
+const focused = ref<boolean>(false)
 
-const
-  value = computed({
-    get (): string {
-      return props.modelValue || ''
-    },
-    set (value: string) {
-      emits('update:modelValue', value)
-    }
-  }),
-  _disabled = computed(() => typeof props.modelValue !== 'string' || !!props.disabled),
-  input = ref() as Ref<HTMLInputElement>,
-  focused = ref<boolean>(false)
-
-function focus () {
+function focus (): void {
   input.value.focus()
 }
 
-function onfocus () {
+function onfocus (): void {
   focused.value = true
 }
 

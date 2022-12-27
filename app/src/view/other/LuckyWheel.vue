@@ -22,7 +22,9 @@
             :key="item.name"
             :style="getItemStyle(item)"
             class="other-lucky-wheel__item"
-            @click="removeItem(item)"
+            @click.left="currentItem = item; dialog.show('lucky-wheel-edit')"
+            @click.prevent.right="currentItem = item; dialog.show('lucky-wheel-edit')"
+            @click.middle="removeItem(item)"
           >
             <h3 class="other-lucky-wheel__item-name">
               {{ item.name }}
@@ -46,7 +48,7 @@
         size="large"
         seriousness="success"
         appearance="outlined"
-        @click="dialog.show('lucky-wheel')"
+        @click="dialog.show('lucky-wheel-add')"
       >
         <ui-icon
           icon="plus"
@@ -69,17 +71,73 @@
     </div>
     <ui-dialog
       classes="other-lucky-wheel__dialog"
-      name="lucky-wheel"
+      name="lucky-wheel-edit"
+      title="Edit"
+    >
+      <template #body>
+        <div
+          v-if="currentItem"
+          class="other-lucky-wheel__general"
+        >
+          <ui-input-text
+            label="Name"
+            :model-value="currentItem.name"
+            @update:model-value="currentItem.name = $event; items = [...items]"
+          />
+          <ui-input-text
+            label="Value"
+            :model-value="`${currentItem.value}` || ''"
+            @update:model-value="currentItem.value = +$event; items = [...items]"
+          />
+        </div>
+        <div
+          v-if="currentItem"
+          class="other-lucky-wheel__background"
+        >
+          <ui-input-color
+            v-if="currentItem.color"
+            :model-value="currentItem.color"
+            @update:model-value="currentItem.color = $event; items = [...items]"
+          />
+          <ui-input-text
+            v-else
+            :model-value="currentItem.image"
+            label="Image URL"
+            @update:model-value="currentItem.image = $event; items = [...items]"
+          />
+        </div>
+      </template>
+      <template #footer>
+        <ui-button
+          seriousness="passive"
+          appearance="outlined"
+          @click="dialog.hide()"
+        >
+          Close
+        </ui-button>
+        <div style="flex: 1" />
+        <ui-button
+          seriousness="danger"
+          appearance="outlined"
+          @click="dialog.hide(); removeItem(currentItem)"
+        >
+          Remove
+        </ui-button>
+      </template>
+    </ui-dialog>
+    <ui-dialog
+      classes="other-lucky-wheel__dialog"
+      name="lucky-wheel-add"
       title="New element"
       disable-footer
     >
       <template #body>
         <ui-tree-select
           :model-value="element"
-          @update:model-value="selectElement"
-          label="Element"
           :options="elements"
+          label="Element"
           directories-disabled
+          @update:model-value="selectElement"
         >
           <template #selected="{ selected }">
             <div
@@ -102,8 +160,8 @@
           </template>
           <template #item="{ item, directory }">
             <ui-icon
-              class="other-lucky-wheel__folder"
               v-if="directory"
+              class="other-lucky-wheel__folder"
               icon="folder-empty"
             />
             <div
@@ -157,6 +215,7 @@
             size="small"
             seriousness="success"
             appearance="text"
+            @click="saveItem"
           >
             <ui-icon
               icon="plus"
@@ -254,13 +313,50 @@ const defaultItems = [
           name: 'Minecraft',
           color: '#0a601e'
         }
+      },
+      {
+        value: {
+          name: 'Red Dead Redemption 2',
+          color: '#C40410'
+        }
+      },
+      {
+        value: {
+          name: 'Apex Legends',
+          color: '#F30101'
+        }
       }
     ],
     value: {
       name: 'Games'
     }
+  },
+  {
+    items: [
+      {
+        value: {
+          name: 'YouTube',
+          color: '#FF0000'
+        }
+      }
+    ],
+    value: {
+      name: 'Watch'
+    }
   }
 ]
+
+const savedItems = localStorageRef<{
+  items: Array<{ value: Item }>,
+  value: {
+    name: string
+  }
+}>('lucky-wheel:saved-items', {
+  items: [],
+  value: {
+    name: 'Saved'
+  }
+})
 
 const backgrounds = ['Image', 'Color']
 
@@ -270,6 +366,10 @@ const name = localStorageRef<string>('lucky-wheel:name', '')
 const value = localStorageRef<string>('lucky-wheel:value', '1')
 const color = localStorageRef<string>('lucky-wheel:color', '#808080')
 const image = localStorageRef<string>('lucky-wheel:image', '')
+
+const currentItem = ref<Item>()
+
+watch(currentItem, () => items.value = [...items.value])
 
 const computedCustom = computed(() => ({
   value: {
@@ -282,7 +382,8 @@ const computedCustom = computed(() => ({
 
 const elements = computed(() => {
   return [
-    ...defaultItems
+    ...defaultItems,
+    savedItems.value
   ]
 })
 
@@ -347,9 +448,25 @@ const winner = computed(() => {
   const angle_ = angle.value % (2 * Math.PI)
 
   let index = items_.findIndex(_ => -_.rotate >= angle_)
-  let result = items_.at(index === -1 ? 0 : index)
-  return result
+  return items_.at(index === -1 ? 0 : index)
 })
+
+function saveItem (): void {
+  const _value = +value.value
+  savedItems.value = {
+    ...savedItems.value,
+    items: [
+      ...savedItems.value.items.filter(option => option.value.name !== name.value), {
+        value: {
+          name: name.value,
+          value: isNaN(_value) && _value <= 0 ? 1 : _value,
+          image: image.value,
+          color: color.value
+        }
+      }
+    ]
+  }
+}
 
 function isItemColor (item: Item): item is Item {
   return 'color' in item
@@ -523,7 +640,7 @@ function addItem (): void {
     transform-origin: 50% 50%;
     height: 100%;
     width: 100%;
-    rotate: var(--rotate);
+    rotate: calc(var(--rotate) * -1);
     border-radius: 50%;
     background-color: var(--background-color);
     clip-path: var(--clip-path);

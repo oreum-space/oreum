@@ -95,6 +95,7 @@
 
   &:disabled {
     opacity: 0.4;
+    cursor: not-allowed;
   }
 
   &_invalid {
@@ -132,6 +133,41 @@
     top: 8px;
     right: 12px;
     user-select: none;
+  }
+}
+
+.ui-input-number {
+  &__input {
+    -moz-appearance: textfield;
+  }
+
+  &:focus-within &__input {
+    --border-color: var(--primary-color);
+  }
+
+  &__input::-webkit-outer-spin-button,
+  &__input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  .ui-button.ui-input-number__arrow {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    height: 16px;
+    border-radius: 0 0 2px 2px;
+    padding-inline: 2px;
+    color: var(--surface-border-a);
+  }
+
+  &:focus-within .ui-button.ui-input-number__arrow  {
+    color: var(--primary-color);
+  }
+
+  .ui-button.ui-input-number__arrow_up {
+    top: 4px;
+    rotate: 180deg;
   }
 }
 
