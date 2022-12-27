@@ -354,6 +354,20 @@ const defaultItems = [
     value: {
       name: 'Watch'
     }
+  },
+  {
+    items: [
+      {
+        value: {
+          name: 'Spinning Rat',
+          color: '#404040',
+          image: 'https://64.media.tumblr.com/b6a7c4e51330b788934f7844ec9e5b8b/5c8cc1e46093f556-06/s1280x1920/a03d2c89e542f189dd0eb7f836acbb6615e920bd.gif?hide=true'
+        }
+      }
+    ],
+    value: {
+      name: 'Memes'
+    }
   }
 ]
 
